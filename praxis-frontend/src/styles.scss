@@ -1,0 +1,29 @@
+@use '@angular/material' as mat;
+
+// Material Core
+@include mat.core();
+
+// Paletten
+$praxis-primary: mat.m2-define-palette(mat.$m2-indigo-palette, 600);
+$praxis-accent:  mat.m2-define-palette(mat.$m2-teal-palette, 500);
+$praxis-warn:    mat.m2-define-palette(mat.$m2-red-palette);
+
+// Theme
+$praxis-theme: mat.m2-define-light-theme((
+  color: (
+    primary: $praxis-primary,
+    accent:  $praxis-accent,
+    warn:    $praxis-warn,
+  ),
+  typography: mat.m2-define-typography-config(),
+  density: 0
+));
+
+@include mat.all-component-themes($praxis-theme);
+
+// Kleine globale Layout-Defaults
+html, body { height: 100%; }
+body { margin: 0; background: #f6f7fb; }
+.container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+
+

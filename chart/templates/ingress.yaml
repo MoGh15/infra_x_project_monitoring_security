@@ -1,0 +1,44 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  labels:
+    {{- include "praxis-form.labels" . | nindent 4 }}
+  annotations:
+{{/*    cert-manager.io/cluster-issuer: {{ .Release.Name }}-letsencrypt-staging*/}}
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: {{ .Release.Name }}-tls
+      hosts:
+        - {{ .Values.global.domain }}
+  rules:
+    - host: {{ .Values.global.domain | quote }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          - path: /actuator
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-frontend
+                port:
+                  number: {{ .Values.frontend.service.port }}
+{{- end }}
+

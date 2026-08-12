@@ -1,0 +1,44 @@
+<section class="consent-overlay" *ngIf="!consentService.hasDecision">
+  <div class="consent-backdrop"></div>
+  <div class="consent-card" role="dialog" aria-modal="true" aria-label="Cookie Zustimmung">
+    <div class="consent-header">
+      <span class="consent-kicker">Datenschutz</span>
+      <h1>Cookies & Einstellungen</h1>
+      <p>
+        Wir nutzen notwendige Cookies für Anmeldung und Sicherheit. Optional kannst du
+        Präferenzen (z. B. Sprache/Theme) speichern lassen.
+      </p>
+    </div>
+
+    <div class="consent-options">
+      <div class="consent-option">
+        <div class="consent-option-text">
+          <h2>Notwendig</h2>
+          <p>Erforderlich für Session, Authentifizierung und sichere Nutzung.</p>
+        </div>
+        <div class="consent-pill">Immer aktiv</div>
+      </div>
+
+      <div class="consent-option">
+        <div class="consent-option-text">
+          <h2>Präferenzen</h2>
+          <p>Speichert deine Sprache und das Theme für ein persönliches Erlebnis.</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" [checked]="preferencesEnabled()" (change)="preferencesEnabled.set(!preferencesEnabled())" />
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="consent-actions">
+      <button class="btn btn-secondary" (click)="acceptNecessary()">Nur notwendige</button>
+      <button class="btn btn-ghost" (click)="saveSelection()">Auswahl speichern</button>
+      <button class="btn btn-primary" (click)="acceptAll()">Alle akzeptieren</button>
+    </div>
+
+    <div class="consent-footnote">
+      Du kannst deine Entscheidung jederzeit in den Einstellungen ändern.
+    </div>
+  </div>
+</section>

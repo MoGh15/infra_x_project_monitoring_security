@@ -1,0 +1,27 @@
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:CHANGE_ME_very_long_secret_at_least_32_chars}
+      expiration-minutes: ${JWT_EXP_MINUTES:120}
+  admin:
+    default-password: ${ADMIN_DEFAULT_PASSWORD:changeme}
+
+spring:
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/praxis}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 15MB
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+

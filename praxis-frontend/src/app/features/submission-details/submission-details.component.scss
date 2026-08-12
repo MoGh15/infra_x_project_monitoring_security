@@ -1,0 +1,468 @@
+.page {
+  min-height: 100vh;
+  background: #f6f8fc;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.08);
+  margin-left: 20px;
+
+  .title { font-weight: 700; }
+  .spacer { flex: 1; }
+  border-radius: 16px;
+  .status-pill {
+
+    font-weight: 700;
+    letter-spacing: .2px;
+    border-radius: 999px;
+    padding: 0 10px;
+  }
+
+  .status-pill.new { background: #e3f2fd; color: #0d47a1; }
+  .status-pill.viewed { background: #fff8e1; color: #8d6e00; }
+  .status-pill.done { background: #e8f5e9; color: #1b5e20; }
+}
+
+.content {
+  width: min(1100px, 100%);
+  margin: 18px auto 0;
+  padding: 0 16px 26px;
+}
+
+.card {
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(16, 24, 40, 0.08);
+  overflow: hidden;
+}
+
+.section {
+  margin-top: 16px;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .muted {
+    color: rgba(0,0,0,.55);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  color: rgba(0,0,0,.65);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 16px;
+}
+
+.item {
+  .k {
+    color: rgba(0,0,0,.55);
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .v {
+    font-weight: 600;
+    color: rgba(0,0,0,.85);
+  }
+}
+
+.mono .v {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+}
+
+.muted { color: rgba(0,0,0,.55); }
+
+/* ---- Medical view chips ---- */
+.medical-view {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+
+  .block .k {
+    color: rgba(0,0,0,.55);
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .notes {
+    white-space: pre-wrap;
+  }
+}
+
+/* ---- Attachments ---- */
+.attachments {
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.signature-view {
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(63, 81, 181, 0.06), rgba(255, 255, 255, 0.95));
+}
+
+.signature-view img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(16, 24, 40, 0.08);
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.attachment-item .file-meta {
+  flex: 1;
+}
+
+.attachment-item .file-name {
+  font-weight: 700;
+}
+
+.attachment-item .file-size {
+  font-size: 12px;
+  color: rgba(0,0,0,.55);
+}
+
+.attachment-item .open-ic {
+  margin-left: auto;
+}
+
+.pad {
+  padding: 16px;
+}
+
+.symptom-list {
+  display: grid;
+  gap: 12px;
+}
+
+.symptom-item {
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.85);
+}
+
+.symptom-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.symptom-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+  color: rgba(0,0,0,.65);
+  font-size: 12px;
+}
+
+.symptom-notes {
+  margin-top: 8px;
+  white-space: pre-wrap;
+  color: rgba(0,0,0,.8);
+}
+
+.chipset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border-radius: 999px;
+  font-weight: 600;
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(0,0,0,.08);
+
+  .chip-ic {
+    font-size: 18px;
+    margin-right: 6px;
+    opacity: .85;
+  }
+}
+
+/* ---- Edit form layout ---- */
+.edit-form .grid {
+  align-items: start;
+}
+
+.address {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.span-2 { grid-column: span 2; }
+
+/* ---- medical edit ---- */
+.medical-edit {
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.symptom-edit-list {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  align-items: start;
+}
+
+.symptom-edit-card {
+  position: relative;
+  border: 1px solid rgba(63,81,181,.18);
+  border-radius: 16px;
+  padding: 14px 14px 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f6f7ff 100%);
+  box-shadow: 0 12px 26px rgba(16, 24, 40, 0.08);
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 6px;
+    background: linear-gradient(180deg, #3f51b5 0%, #7986cb 100%);
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.symptom-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed rgba(63,81,181,.18);
+}
+
+.symptom-head-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.symptom-ic {
+  background: rgba(63, 81, 181, 0.14);
+  color: #2f3f9d;
+  border-radius: 14px;
+  padding: 9px;
+  box-shadow: inset 0 0 0 1px rgba(63, 81, 181, 0.18);
+}
+
+.symptom-title {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.symptom-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(63, 81, 181, 0.12);
+  color: #3949ab;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+
+.symptom-remove {
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.08);
+  width: 36px;
+  height: 36px;
+  background: #ffffff;
+  transition: transform .15s ease, box-shadow .15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(16, 24, 40, 0.12);
+  }
+}
+
+.symptom-row {
+  display: grid;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px dashed rgba(63,81,181,.18);
+  background: rgba(63,81,181,.04);
+}
+
+.meta-label {
+  font-size: 12px;
+  color: rgba(0,0,0,.62);
+  font-weight: 600;
+}
+
+.option-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+:host ::ng-deep .option-chips .mat-mdc-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(63,81,181,.2);
+  background: rgba(255,255,255,.9);
+  font-weight: 600;
+}
+
+:host ::ng-deep .option-chips .mat-mdc-chip.mat-mdc-chip-selected {
+  background: rgba(63,81,181,.16);
+  border-color: rgba(63,81,181,.4);
+}
+
+.severity-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.severity-value {
+  font-weight: 700;
+  color: #3f51b5;
+  min-width: 28px;
+  text-align: right;
+}
+
+.medical-group {
+  display: grid;
+  gap: 10px;
+
+  .k {
+    color: rgba(0,0,0,.55);
+    font-size: 12px;
+  }
+}
+
+.add-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .grow { flex: 1; }
+
+  .add-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      margin: 0;
+      line-height: 1;
+    }
+  }
+}
+
+.consents {
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+/* ---- bottom actions (sticky) ---- */
+.actions-bottom {
+  position: sticky;
+  bottom: 0;
+  margin-top: 16px;
+  padding: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+
+  background: linear-gradient(to top, #f6f8fc 70%, rgba(246,248,252,0));
+}
+
+.done-btn {
+  border-radius: 14px;
+  padding: 10px 16px;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(16,24,40,.12);
+}
+
+.edit-btn {
+  border-radius: 14px;
+  padding: 10px 16px;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(16,24,40,.12);
+}
+
+/* ---- Amber dialog theme ---- */
+:host ::ng-deep .amber-dialog .mdc-dialog__surface {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 193, 7, .35);
+  box-shadow: 0 20px 45px rgba(16,24,40,.20);
+}
+
+:host ::ng-deep .amber-dialog .mdc-dialog__title {
+  color: #7a5a00;
+  font-weight: 900;
+}
+
+:host ::ng-deep .amber-dialog .mdc-button--raised,
+:host ::ng-deep .amber-dialog .mdc-button--unelevated {
+  background: #ffc107 !important;
+  color: #3a2a00 !important;
+}
+
+@media (max-width: 860px) {
+  .grid { grid-template-columns: 1fr; }
+  .span-2 { grid-column: auto; }
+  .address { grid-template-columns: 1fr; }
+  .actions-bottom { flex-direction: column; }
+  .severity-row { grid-template-columns: 1fr; }
+  .symptom-edit-list { grid-template-columns: 1fr; }
+}

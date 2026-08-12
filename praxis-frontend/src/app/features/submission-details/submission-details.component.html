@@ -1,0 +1,506 @@
+<div class="container">
+  <mat-toolbar color="primary" class="toolbar">
+    <button mat-icon-button (click)="back()" aria-label="Zurück">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    <span class="title">Submission Details</span>
+    <span class="spacer"></span>
+
+    <!-- Status Pill -->
+    <mat-chip class="status-pill" [ngClass]="(submission()?.status || 'NEW').toLowerCase()">
+      {{ submission()?.status || 'NEW' }}
+    </mat-chip>
+
+  </mat-toolbar>
+
+  <div class="content">
+    <mat-card class="card" *ngIf="loading()">
+      <div class="state">
+        <mat-spinner diameter="28"></mat-spinner>
+        <span>Lade…</span>
+      </div>
+    </mat-card>
+
+    <mat-progress-bar *ngIf="saving()" mode="indeterminate"></mat-progress-bar>
+
+    <ng-container *ngIf="!loading() && submission() as s">
+      <!-- ===================== VIEW MODE ===================== -->
+
+      <ng-container *ngIf="!editing(); else editTpl">
+        <mat-card class="card section">
+          <div class="section-head">
+            <h2>Patient</h2>
+            <span class="muted">Form: {{ s.formVersion }}</span>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="grid">
+            <div class="item">
+              <div class="k">Name</div>
+              <div class="v">{{ s.patientData?.firstName }} {{ s.patientData?.lastName }}</div>
+            </div>
+
+            <div class="item">
+              <div class="k">Geburtstag</div>
+              <div class="v">{{ displayBirthDate(s.patientData?.birthDate) }}</div>
+            </div>
+
+            <div class="item">
+              <div class="k">Telefon</div>
+              <div class="v">{{ s.patientData?.phone || '-' }}</div>
+            </div>
+
+            <div class="item">
+              <div class="k">E-Mail</div>
+              <div class="v">{{ s.patientData?.email || '-' }}</div>
+            </div>
+
+            <div class="item">
+              <div class="k">Erstellt</div>
+              <div class="v">{{ s.createdAt | date:'dd.MM.yyyy, HH:mm' }}</div>
+            </div>
+
+            <div class="item">
+              <div class="k">Adresse</div>
+              <div class="v">{{ s.patientData?.address?.street || '-'}}  {{ s.patientData?.address?.houseNumber || '-'}}</div>
+              <div class="v">{{ s.patientData?.address?.zip || '-'}} {{ s.patientData?.address?.city || '-'}}</div>
+            </div>
+
+            <div class="item mono">
+              <div class="k">ID</div>
+              <div class="v">{{ s.id }}</div>
+            </div>
+          </div>
+        </mat-card>
+
+        <mat-card class="card section">
+          <div class="section-head">
+            <h2>Medizinisch</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="medical-view">
+            <div class="block">
+              <div class="k">Symptome/Beschwerden</div>
+              <div class="symptom-list" *ngIf="normalizeSymptoms(s.medical?.symptoms).length; else dashS">
+                <div class="symptom-item" *ngFor="let sym of normalizeSymptoms(s.medical?.symptoms)">
+                  <div class="symptom-title">
+                    <mat-icon class="chip-ic">{{ symptomConfig(sym.key).icon }}</mat-icon>
+                    <span>{{ sym.label }}</span>
+                  </div>
+                  <div class="symptom-meta">
+                    <span *ngIf="sym.option">Option: {{ sym.option }}</span>
+                    <span *ngIf="sym.severity !== null && sym.severity !== undefined">Staerke: {{ sym.severity }}/10</span>
+                    <span *ngIf="sym.onset">Seit wann: {{ sym.onset }}</span>
+                  </div>
+                  <div class="symptom-notes" *ngIf="sym.notes">{{ sym.notes }}</div>
+                </div>
+              </div>
+              <ng-template #dashS><div class="v muted">-</div></ng-template>
+            </div>
+
+            <div class="block">
+              <div class="k">Allergien</div>
+              <mat-chip-set class="chipset" *ngIf="unique(s.medical?.allergies || []).length; else dashA">
+                <mat-chip class="chip" *ngFor="let a of unique(s.medical?.allergies || [])">
+                  <mat-icon class="chip-ic">error_outline</mat-icon>
+                  {{ a }}
+                </mat-chip>
+              </mat-chip-set>
+              <ng-template #dashA><div class="v muted">-</div></ng-template>
+            </div>
+
+            <div class="block">
+              <div class="k">Medikamente</div>
+              <mat-chip-set class="chipset" *ngIf="unique(s.medical?.medications || []).length; else dashM">
+                <mat-chip class="chip" *ngFor="let m of unique(s.medical?.medications || [])">
+                  <mat-icon class="chip-ic">medication</mat-icon>
+                  {{ m }}
+                </mat-chip>
+              </mat-chip-set>
+              <ng-template #dashM><div class="v muted">-</div></ng-template>
+            </div>
+
+            <div class="block">
+              <div class="k">Vorerkrankungen</div>
+              <mat-chip-set class="chipset" *ngIf="unique(s.medical?.preExistingConditions || []).length; else dashC">
+                <mat-chip class="chip" *ngFor="let c of unique(s.medical?.preExistingConditions || [])">
+                  <mat-icon class="chip-ic">assignment</mat-icon>
+                  {{ c }}
+                </mat-chip>
+              </mat-chip-set>
+              <ng-template #dashC><div class="v muted">-</div></ng-template>
+            </div>
+          </div>
+        </mat-card>
+
+        <mat-card class="card section">
+          <div class="section-head">
+            <h2>Unterschrift</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="signature-view" *ngIf="signatureDataUrl(s.signature) as sigUrl; else noSig">
+            <img [src]="sigUrl" alt="Unterschrift" />
+          </div>
+          <ng-template #noSig>
+            <div class="muted pad">-</div>
+          </ng-template>
+        </mat-card>
+
+        <mat-card class="card section">
+          <div class="section-head">
+            <h2>Dokumente</h2>
+            <span class="muted" *ngIf="s.attachments?.length">{{ s.attachments?.length || 0 }} Dateien</span>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="attachments" *ngIf="s.attachments?.length; else noDocs">
+            <button
+              mat-stroked-button
+              type="button"
+              class="attachment-item"
+              *ngFor="let att of s.attachments"
+              (click)="openAttachment(att)"
+            >
+              <mat-icon class="file-ic">{{ attachmentIcon(att) }}</mat-icon>
+              <div class="file-meta">
+                <div class="file-name">{{ att.fileName }}</div>
+                <div class="file-size">{{ formatFileSize(att.size) }}</div>
+              </div>
+              <mat-icon class="open-ic">open_in_new</mat-icon>
+            </button>
+          </div>
+          <ng-template #noDocs>
+            <div class="muted pad">-</div>
+          </ng-template>
+        </mat-card>
+
+        <mat-card class="card section">
+          <div class="section-head">
+            <h2>Einwilligungen</h2>
+          </div>
+          <mat-divider></mat-divider>
+
+          <div class="grid">
+            <div class="item">
+              <div class="k">DSGVO</div>
+              <div class="v">{{ s.consents?.gdprAccepted ? 'Ja' : 'Nein' }}</div>
+            </div>
+            <div class="item">
+              <div class="k">Datenweitergabe</div>
+              <div class="v">{{ s.consents?.dataSharingAccepted ? 'Ja' : 'Nein' }}</div>
+            </div>
+          </div>
+        </mat-card>
+      </ng-container>
+
+      <!-- ===================== EDIT MODE ===================== -->
+      <ng-template #editTpl>
+        <form [formGroup]="form" class="edit-form" autocomplete="off">
+          <!-- Patient -->
+          <mat-card class="card section">
+            <div class="section-head">
+              <h2>Patient bearbeiten</h2>
+              <span class="muted">Form: {{ s.formVersion }}</span>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="grid" formGroupName="patientData">
+              <mat-form-field appearance="outline">
+                <mat-label>Vorname *</mat-label>
+                <input matInput formControlName="firstName" />
+                <mat-error *ngIf="pd().firstName.touched && pd().firstName.invalid">Pflichtfeld</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Nachname *</mat-label>
+                <input matInput formControlName="lastName" />
+                <mat-error *ngIf="pd().lastName.touched && pd().lastName.invalid">Pflichtfeld</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Geburtsdatum *</mat-label>
+                <input matInput type="date" formControlName="birthDate" />
+                <mat-error *ngIf="pd().birthDate.touched && pd().birthDate.invalid">Pflichtfeld</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Telefon</mat-label>
+                <input matInput formControlName="phone" />
+                <mat-error *ngIf="pd().phone.touched && pd().phone.invalid">Ungültiges Format</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="span-2">
+                <mat-label>E-Mail</mat-label>
+                <input matInput formControlName="email" />
+                <mat-error *ngIf="pd().email.touched && pd().email.invalid">Ungültige E-Mail</mat-error>
+              </mat-form-field>
+
+              <div formGroupName="address" class="address span-2">
+                <mat-form-field appearance="outline" class="span-2">
+                  <mat-label>Straße</mat-label>
+                  <input matInput formControlName="street" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Hausnummer</mat-label>
+                  <input matInput formControlName="houseNumber" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>PLZ</mat-label>
+                  <input matInput formControlName="zip" />
+                  <mat-error *ngIf="addr().zip.touched && addr().zip.invalid">5-stellige PLZ</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Ort</mat-label>
+                  <input matInput formControlName="city" />
+                </mat-form-field>
+              </div>
+            </div>
+          </mat-card>
+
+          <!-- Medizinisch (editierbar als Chips + Add) -->
+          <mat-card class="card section">
+            <div class="section-head">
+              <h2>Medizinisch bearbeiten</h2>
+              <span class="muted">Einträge hinzufügen/entfernen</span>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="medical-edit" formGroupName="medical">
+              <!-- Symptome -->
+              <div class="medical-group">
+                <div class="k">Symptome/Beschwerden</div>
+
+                <div class="add-row">
+                  <mat-form-field appearance="outline" class="grow">
+                    <mat-label>Weiteres Symptom</mat-label>
+                    <input matInput [formControl]="extraSymptom" />
+                  </mat-form-field>
+
+                  <button mat-icon-button color="primary" type="button" class="add-btn"
+                          (click)="addCustomSymptom()">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+
+                <div class="symptom-edit-list" formArrayName="symptoms" *ngIf="symptomControls.length">
+                  <div class="symptom-edit-card" *ngFor="let s of symptomControls; let i = index" [formGroupName]="i">
+                    <div class="symptom-card-head">
+                      <div class="symptom-head-left">
+                        <mat-icon class="symptom-ic">{{ symptomConfig(s.value.key).icon }}</mat-icon>
+                        <div>
+                          <div class="symptom-title">{{ s.value.label }}</div>
+                          <div class="symptom-sub">Details</div>
+                        </div>
+                      </div>
+                      <button mat-icon-button type="button" class="symptom-remove" (click)="removeSymptom(i)">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+
+                    <div class="symptom-row" *ngIf="symptomConfig(s.value.key).options?.length">
+                      <div class="meta-label">Auswahl</div>
+                      <mat-chip-listbox class="option-chips" formControlName="option" [multiple]="false">
+                        <mat-chip-option
+                          *ngFor="let opt of symptomConfig(s.value.key).options"
+                          [value]="opt">
+                          {{ opt }}
+                        </mat-chip-option>
+                      </mat-chip-listbox>
+                    </div>
+
+                    <div class="symptom-row">
+                      <div class="meta-label">Staerke (0-10)</div>
+                      <div class="severity-row">
+                        <mat-slider min="0" max="10" step="1">
+                          <input matSliderThumb formControlName="severity" />
+                        </mat-slider>
+                        <div class="severity-value">{{ s.value.severity }}</div>
+                      </div>
+                    </div>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Seit wann?</mat-label>
+                      <mat-select formControlName="onset">
+                        <mat-option *ngFor="let opt of symptomDurationOptions" [value]="opt">
+                          {{ opt }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Weitere Hinweise</mat-label>
+                      <textarea matInput rows="3" formControlName="notes"></textarea>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <!-- Allergien -->
+              <div class="medical-group">
+                <div class="k">Allergien</div>
+
+                <mat-chip-set class="chipset" *ngIf="med().allergies.value.length">
+                  <mat-chip class="chip" *ngFor="let a of med().allergies.value" removable (removed)="removeChip(med().allergies, a)">
+                    {{ a }}
+                    <button matChipRemove>
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-chip>
+                </mat-chip-set>
+
+                <div class="add-row">
+                  <mat-form-field appearance="outline" class="grow">
+                    <mat-label>Weitere Allergie</mat-label>
+                    <input matInput [formControl]="extraAllergy" />
+                  </mat-form-field>
+
+                  <button mat-icon-button color="primary" type="button" class="add-btn"
+                          (click)="addExtra(med().allergies, extraAllergy)">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <!-- Medikamente -->
+              <div class="medical-group">
+                <div class="k">Medikamente</div>
+
+                <mat-chip-set class="chipset" *ngIf="med().medications.value.length">
+                  <mat-chip class="chip" *ngFor="let m of med().medications.value" removable (removed)="removeChip(med().medications, m)">
+                    {{ m }}
+                    <button matChipRemove>
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-chip>
+                </mat-chip-set>
+
+                <div class="add-row">
+                  <mat-form-field appearance="outline" class="grow">
+                    <mat-label>Weiteres Medikament</mat-label>
+                    <input matInput [formControl]="extraMedication" />
+                  </mat-form-field>
+
+                  <button mat-icon-button color="primary" type="button" class="add-btn"
+                          (click)="addExtra(med().medications, extraMedication)">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <!-- Vorerkrankungen -->
+              <div class="medical-group">
+                <div class="k">Vorerkrankungen</div>
+
+                <mat-chip-set class="chipset" *ngIf="med().preExistingConditions.value.length">
+                  <mat-chip class="chip" *ngFor="let c of med().preExistingConditions.value" removable (removed)="removeChip(med().preExistingConditions, c)">
+                    {{ c }}
+                    <button matChipRemove>
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-chip>
+                </mat-chip-set>
+
+                <div class="add-row">
+                  <mat-form-field appearance="outline" class="grow">
+                    <mat-label>Weitere Vorerkrankung</mat-label>
+                    <input matInput [formControl]="extraCondition" />
+                  </mat-form-field>
+
+                  <button mat-icon-button color="primary" type="button" class="add-btn"
+                          (click)="addExtra(med().preExistingConditions, extraCondition)">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </mat-card>
+
+          <mat-card class="card section">
+            <div class="section-head">
+              <h2>Dokumente</h2>
+              <span class="muted" *ngIf="s.attachments?.length">{{ s.attachments?.length || 0 }} Dateien</span>
+            </div>
+            <mat-divider></mat-divider>
+
+            <div class="attachments" *ngIf="s.attachments?.length; else noDocsEdit">
+              <button
+                mat-stroked-button
+                type="button"
+                class="attachment-item"
+                *ngFor="let att of s.attachments"
+                (click)="openAttachment(att)"
+              >
+                <mat-icon class="file-ic">{{ attachmentIcon(att) }}</mat-icon>
+                <div class="file-meta">
+                  <div class="file-name">{{ att.fileName }}</div>
+                  <div class="file-size">{{ formatFileSize(att.size) }}</div>
+                </div>
+                <mat-icon class="open-ic">open_in_new</mat-icon>
+              </button>
+            </div>
+            <ng-template #noDocsEdit>
+              <div class="muted pad">-</div>
+            </ng-template>
+          </mat-card>
+
+          <!-- Einwilligungen -->
+          <mat-card class="card section">
+            <div class="section-head">
+              <h2>Einwilligungen bearbeiten</h2>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="consents" formGroupName="consents">
+              <mat-checkbox formControlName="gdprAccepted">DSGVO akzeptiert</mat-checkbox>
+              <mat-checkbox formControlName="dataSharingAccepted">Datenweitergabe akzeptiert</mat-checkbox>
+            </div>
+          </mat-card>
+        </form>
+      </ng-template>
+
+      <!-- Bottom actions -->
+      <div class="actions-bottom">
+        <div class="left">
+          <button mat-stroked-button type="button" color="primary" class="edit-btn" (click)="editing() ? cancelEdit() : startEdit()">
+            <mat-icon>{{ editing() ? 'close' : 'edit' }}</mat-icon>
+            {{ editing() ? 'Abbrechen' : 'Bearbeiten' }}
+          </button>
+        </div>
+
+        <div class="right">
+          <button
+            mat-flat-button
+            color="primary"
+            class="done-btn"
+            (click)="markDone()">
+
+            <mat-icon>
+              {{ submission()?.status === 'DONE' ? 'save' : 'check_circle' }}
+            </mat-icon>
+
+            {{ submission()?.status === 'DONE'
+            ? 'Speichern'
+            : 'Speichern & als DONE markieren'
+            }}
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
