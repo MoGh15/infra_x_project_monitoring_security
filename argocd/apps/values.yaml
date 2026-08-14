@@ -1,0 +1,56 @@
+# Values for the app-of-apps chart.
+# These parameters are shared by all templated ArgoCD Applications.
+
+# Git repository that holds this repo (chart sources + config values).
+repo:
+  url: https://github.com/MoGh15/infra_x_project_monitoring_security.git
+  targetRevision: main
+
+# ArgoCD project and destination defaults for all child Applications.
+argocd:
+  namespace: argocd
+  project: default
+
+destination:
+  server: https://kubernetes.default.svc
+
+# --- praxis-form Application (frontend, backend, MongoDB) ---
+praxisForm:
+  enabled: true
+  name: praxis-form
+  namespace: praxis
+  path: chart
+  valueFiles:
+    - values.yaml
+
+# --- External Helm-chart based Applications ---
+# Each entry is rendered as a multi-source ArgoCD Application: the upstream
+# Helm chart plus a $values reference to this git repo for the value file(s).
+helmApps:
+  grafana:
+    enabled: true
+    namespace: grafana
+    chart:
+      repoURL: https://grafana-community.github.io/helm-charts/
+      name: grafana
+      version: "12.7.1"
+    valueFiles:
+      - configs/grafana/values/grafana--common.yaml
+  loki:
+    enabled: true
+    namespace: loki
+    chart:
+      repoURL: https://grafana-community.github.io/helm-charts/
+      name: loki
+      version: "18.8.1"
+    valueFiles:
+      - configs/loki/values/loki--common.yaml
+  alloy:
+    enabled: true
+    namespace: alloy
+    chart:
+      repoURL: https://grafana.github.io/helm-charts
+      name: alloy
+      version: "1.11.1"
+    valueFiles:
+      - configs/alloy/values/alloy--common.yaml
