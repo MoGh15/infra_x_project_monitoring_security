@@ -1,0 +1,29 @@
+{{- with .Values.helmApps.certManagerWebhookOvh }}
+{{- if .enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.argocd.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .syncWave | quote }}
+spec:
+  project: {{ $.Values.argocd.project }}
+  sources:
+    - repoURL: {{ .chart.repoURL }}
+      chart: {{ .chart.name }}
+      targetRevision: {{ .chart.version | quote }}
+      helm:
+        valueFiles:
+          {{- range .valueFiles }}
+          - $values/{{ . }}
+          {{- end }}
+    - repoURL: {{ $.Values.repo.url }}
+      targetRevision: {{ $.Values.repo.targetRevision }}
+      ref: values
+  destination:
+    server: {{ $.Values.destination.server }}
+    namespace: {{ .namespace }}
+  {{- include "apps.syncPolicy" $ | nindent 2 }}
+{{- end }}
+{{- end }}

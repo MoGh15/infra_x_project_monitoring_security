@@ -1,0 +1,20 @@
+{{- if .Values.praxisForm.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.praxisForm.name }}
+  namespace: {{ .Values.argocd.namespace }}
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.repo.url }}
+    targetRevision: {{ .Values.repo.targetRevision }}
+    path: {{ .Values.praxisForm.path }}
+    helm:
+      valueFiles:
+        {{- toYaml .Values.praxisForm.valueFiles | nindent 8 }}
+  destination:
+    server: {{ .Values.destination.server }}
+    namespace: {{ .Values.praxisForm.namespace }}
+  {{- include "apps.syncPolicy" . | nindent 2 }}
+{{- end }}

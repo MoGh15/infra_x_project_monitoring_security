@@ -70,3 +70,5 @@ tmp/
 *.swo
 config.toml
 AGENTS.md
+chart/charts
+chart/Chart.lock

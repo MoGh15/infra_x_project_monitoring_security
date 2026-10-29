@@ -1,20 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: praxis-form
+  name: app-of-apps
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://github.com/MoGh15/infra_x_projekt.git
+    repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
     targetRevision: main
-    path: chart
+    path: argocd/apps
     helm:
       valueFiles:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: praxis
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true

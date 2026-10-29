@@ -1,0 +1,27 @@
+{{- with .Values.helmApps.loki }}
+{{- if .enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki
+  namespace: {{ $.Values.argocd.namespace }}
+spec:
+  project: {{ $.Values.argocd.project }}
+  sources:
+    - repoURL: {{ .chart.repoURL }}
+      chart: {{ .chart.name }}
+      targetRevision: {{ .chart.version | quote }}
+      helm:
+        valueFiles:
+          {{- range .valueFiles }}
+          - $values/{{ . }}
+          {{- end }}
+    - repoURL: {{ $.Values.repo.url }}
+      targetRevision: {{ $.Values.repo.targetRevision }}
+      ref: values
+  destination:
+    server: {{ $.Values.destination.server }}
+    namespace: {{ .namespace }}
+  {{- include "apps.syncPolicy" $ | nindent 2 }}
+{{- end }}
+{{- end }}

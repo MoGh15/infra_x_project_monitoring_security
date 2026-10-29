@@ -1,0 +1,37 @@
+# Common values for the standalone Grafana ArgoCD Application.
+# Consumed by argocd/apps grafana Application via $values reference.
+
+adminUser: admin
+adminPassword: CHANGE_ME_very_long_password_at_least_32_chars
+
+# Wire Loki as a Grafana datasource.
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki.loki.svc.cluster.local:3100
+        isDefault: true
+        jsonData:
+          maxLines: 1000
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+        isDefault: false
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: praxis-form-letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+  hosts:
+    - grafana-mohammad2.praxis-form.de
+  tls:
+    - secretName: praxis-form-grafana-mohammad-tls
+      hosts:
+        - grafana-mohammad2.praxis-form.de
