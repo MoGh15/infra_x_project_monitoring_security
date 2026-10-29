@@ -1,0 +1,42 @@
+# Common values for the cert-manager-webhook-ovh ArgoCD Application.
+# Consumed via $values reference from argocd-bootstrap/apps cert-manager-webhook-ovh Application.
+#
+# This webhook adds an OVH DNS01 solver to cert-manager and, via the `issuers`
+# block below, also creates the ClusterIssuer that the rest of the platform
+# references (e.g. `cert-manager.io/cluster-issuer: praxis-form-ovh-dns` on an
+# Ingress). cert-manager then requests Let's Encrypt certificates by solving the
+# DNS01 challenge through the OVH API.
+
+# Unique group name identifying this webhook. Must stay in sync with the issuer
+# that references it (the chart wires this automatically for the issuers below).
+groupName: acme.praxis-form.de
+
+# Must match the cert-manager deployment created by the cert-manager Application.
+certManager:
+  namespace: cert-manager
+  serviceAccountName: cert-manager
+
+issuers:
+  - name: praxis-form-ovh-dns
+    create: true
+    kind: ClusterIssuer
+    email: admin@praxis-form.de
+    acmeServerUrl: https://acme-v02.api.letsencrypt.org/directory
+    ovhEndpointName: ovh-eu
+    ovhAuthenticationMethod: application
+    # Credentials are read from a pre-created secret (NOT committed to git).
+    # Create it once in the cert-manager namespace with:
+    #   kubectl -n cert-manager create secret generic ovh-credentials \
+    #     --from-literal=applicationKey=xxx \
+    #     --from-literal=applicationSecret=xxx \
+    #     --from-literal=applicationConsumerKey=xxx
+    ovhAuthenticationRef:
+      applicationKeyRef:
+        name: ovh-credentials
+        key: applicationKey
+      applicationSecretRef:
+        name: ovh-credentials
+        key: applicationSecret
+      applicationConsumerKeyRef:
+        name: ovh-credentials
+        key: applicationConsumerKey

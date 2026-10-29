@@ -1,0 +1,41 @@
+# Common values for the external-dns ArgoCD Application.
+# Consumed via $values reference from argocd-bootstrap/apps external-dns Application.
+#
+# external-dns watches Ingress (and Service) objects and automatically creates /
+# updates the corresponding DNS records in the OVH zone. Combined with the
+# ingress-nginx LoadBalancer, every sub-domain declared on an Ingress is published
+# to OVH without manual intervention.
+
+provider:
+  name: ovh
+
+# Only manage records for ingress-nginx ingresses/services.
+sources:
+  - ingress
+  - service
+
+# Restrict external-dns to the zone(s) you own in OVH.
+domainFilters:
+  - praxis-form.de
+
+# Use the OVH EU endpoint (change to ovh-ca / etc. if your zone is hosted elsewhere).
+extraArgs:
+  - --ovh-endpoint=ovh-eu
+
+policy: sync
+registry: txt
+txtOwnerId: praxis-form-k8s
+txtPrefix: _extdns.
+
+# OVH API credentials are injected from a pre-created secret (NOT committed to git).
+# Create it once with:
+#   kubectl -n external-dns create secret generic ovh-credentials \
+#     --from-literal=OVH_APPLICATION_KEY=xxx \
+#     --from-literal=OVH_APPLICATION_SECRET=xxx \
+#     --from-literal=OVH_CONSUMER_KEY=xxx
+envFrom:
+  - secretRef:
+      name: ovh-credentials
+
+interval: 1m
+logLevel: info

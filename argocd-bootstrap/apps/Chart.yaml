@@ -1,0 +1,6 @@
+apiVersion: v2
+name: bootstrap-apps
+description: Bootstrap app-of-apps Helm chart that templates the cluster infrastructure ArgoCD child Applications (ingress-nginx, cert-manager, cert-manager-webhook-ovh, external-dns)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
