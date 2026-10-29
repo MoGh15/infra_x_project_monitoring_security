@@ -1,0 +1,28 @@
+# Common values for the kube-prometheus-stack ArgoCD Application.
+# Consumed by argocd/apps prometheus Application via $values reference.
+#
+# Provides: Prometheus Operator, Prometheus, Alertmanager, node-exporter
+# (DaemonSet, node metrics) and kube-state-metrics (cluster object metrics).
+# These are enabled by default and require nothing extra to be activated in
+# the cluster - node-exporter and kube-state-metrics are deployed by the chart
+# and Prometheus scrapes kubelet/cAdvisor/API metrics out of the box.
+
+# We run our own standalone Grafana Application, so disable the bundled one.
+grafana:
+  enabled: false
+
+# Scrape ServiceMonitors/PodMonitors from all namespaces (not only those with
+# the Helm release label), so app metrics can be discovered cluster-wide.
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    retention: 15d
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi

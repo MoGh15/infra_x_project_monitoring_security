@@ -54,3 +54,12 @@ helmApps:
       version: "1.11.1"
     valueFiles:
       - configs/alloy/values/alloy--common.yaml
+  prometheus:
+    enabled: true
+    namespace: monitoring
+    chart:
+      repoURL: https://prometheus-community.github.io/helm-charts
+      name: kube-prometheus-stack
+      version: "88.3.0"
+    valueFiles:
+      - configs/kube-prometheus-stack/values/kube-prometheus-stack--common.yaml

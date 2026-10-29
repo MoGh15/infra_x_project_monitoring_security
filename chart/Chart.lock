@@ -2,8 +2,5 @@ dependencies:
 - name: mongodb
   repository: https://charts.bitnami.com/bitnami
   version: 14.13.0
-- name: grafana
-  repository: https://grafana-community.github.io/helm-charts/
-  version: 12.7.1
-digest: sha256:94844ea6e26a7bf14da1c714898ba4cabbb3c563a86313d4d84e6941bc631b51
-generated: "2026-07-01T14:04:01.5841954+02:00"
+digest: sha256:d612450705d7cc7ff25f3d14de351b694cb1dcb83e3a33d2790726df9c880ba4
+generated: "2026-08-14T20:31:33.9411663+02:00"
