@@ -26,7 +26,7 @@ ingress:
   enabled: true
   ingressClassName: nginx
   annotations:
-    cert-manager.io/cluster-issuer: lets-encrypt-prod
+    cert-manager.io/cluster-issuer: letsencrypt-ovh-prod
     external-dns.alpha.kubernetes.io/hostname: grafana.infra-x.cloud
   hosts:
     - grafana.infra-x.cloud

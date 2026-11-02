@@ -3,7 +3,7 @@
 global:
   domain: praxis.infra-x.cloud
   # ClusterIssuer fuer cert-manager (OVH DNS01 Webhook). Muss im Cluster existieren.
-  clusterIssuer: lets-encrypt-prod
+  clusterIssuer: letsencrypt-ovh-prod
 
 ingress:
   enabled: true
