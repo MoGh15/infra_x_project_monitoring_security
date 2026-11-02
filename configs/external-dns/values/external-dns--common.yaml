@@ -28,14 +28,29 @@ txtOwnerId: infra-x-k8s
 txtPrefix: _extdns.
 
 # OVH API credentials are injected from a pre-created secret (NOT committed to git).
-# Create it once with:
+# The sigs external-dns chart does NOT support `envFrom`, so each variable is wired
+# individually via `env` + secretKeyRef. Create the secret once with:
 #   kubectl -n external-dns create secret generic ovh-credentials \
 #     --from-literal=OVH_APPLICATION_KEY=xxx \
 #     --from-literal=OVH_APPLICATION_SECRET=xxx \
 #     --from-literal=OVH_CONSUMER_KEY=xxx
-envFrom:
-  - secretRef:
-      name: ovh-credentials
+# (or via the SealedSecret in configs/external-dns/manifests).
+env:
+  - name: OVH_APPLICATION_KEY
+    valueFrom:
+      secretKeyRef:
+        name: ovh-credentials
+        key: OVH_APPLICATION_KEY
+  - name: OVH_APPLICATION_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: ovh-credentials
+        key: OVH_APPLICATION_SECRET
+  - name: OVH_CONSUMER_KEY
+    valueFrom:
+      secretKeyRef:
+        name: ovh-credentials
+        key: OVH_CONSUMER_KEY
 
 interval: 1m
 logLevel: info
