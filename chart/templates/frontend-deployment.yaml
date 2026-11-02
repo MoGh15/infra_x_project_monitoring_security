@@ -24,6 +24,8 @@ spec:
           env:
             - name: API_URL
               value: {{ .Values.frontend.env.API_URL | quote }}
+            - name: BACKEND_URL
+              value: "http://{{ .Release.Name }}-backend:{{ .Values.backend.service.port }}"
           resources:
             {{- toYaml .Values.frontend.resources | nindent 12 }}
           readinessProbe:
