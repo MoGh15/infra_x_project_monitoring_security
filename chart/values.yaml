@@ -1,12 +1,12 @@
 # Default values for praxis-form
 
 global:
-  domain: kubernetes2.praxis-form.de
+  domain: praxis.infra-x.cloud
 
 ingress:
   enabled: true
 
-praxisHost: kubernetes2.praxis-form.de
+praxisHost: praxis.infra-x.cloud
 
 # --- Backend ---
 backend:
@@ -92,10 +92,3 @@ mongodb:
     enabled: true
     size: 8Gi
 
-# --- Cert-Manager (separat installiert) ---
-certManager:
-  # E-Mail für Let's Encrypt Registrierung
-  email: mohammadghannam892@gmail.com
-  # Prod: https://acme-v02.api.letsencrypt.org/directory
-  # Staging: https://acme-staging-v02.api.letsencrypt.org/directory
-  acmeServer: https://acme-staging-v02.api.letsencrypt.org/directory

@@ -21,6 +21,11 @@ spec:
     - repoURL: {{ $.Values.repo.url }}
       targetRevision: {{ $.Values.repo.targetRevision }}
       ref: values
+    {{- if .manifestsPath }}
+    - repoURL: {{ $.Values.repo.url }}
+      targetRevision: {{ $.Values.repo.targetRevision }}
+      path: {{ .manifestsPath }}
+    {{- end }}
   destination:
     server: {{ $.Values.destination.server }}
     namespace: {{ .namespace }}

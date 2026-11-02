@@ -16,7 +16,7 @@ sources:
 
 # Restrict external-dns to the zone(s) you own in OVH.
 domainFilters:
-  - praxis-form.de
+  - infra-x.cloud
 
 # Use the OVH EU endpoint (change to ovh-ca / etc. if your zone is hosted elsewhere).
 extraArgs:
@@ -24,7 +24,7 @@ extraArgs:
 
 policy: sync
 registry: txt
-txtOwnerId: praxis-form-k8s
+txtOwnerId: infra-x-k8s
 txtPrefix: _extdns.
 
 # OVH API credentials are injected from a pre-created secret (NOT committed to git).

@@ -72,6 +72,8 @@ helmApps:
       version: "1.23.0"
     valueFiles:
       - configs/external-dns/values/external-dns--common.yaml
+    # Extra git source: deploys the OVH-credentials SealedSecret into this app.
+    manifestsPath: configs/external-dns/manifests
 
   certManagerWebhookOvh:
     enabled: true
@@ -84,3 +86,5 @@ helmApps:
       version: "0.9.19"
     valueFiles:
       - configs/cert-manager-webhook-ovh/values/cert-manager-webhook-ovh--common.yaml
+    # Extra git source: deploys the OVH-credentials SealedSecret into this app.
+    manifestsPath: configs/cert-manager-webhook-ovh/manifests

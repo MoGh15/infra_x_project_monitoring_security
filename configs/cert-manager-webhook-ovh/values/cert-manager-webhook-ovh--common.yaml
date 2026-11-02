@@ -3,13 +3,13 @@
 #
 # This webhook adds an OVH DNS01 solver to cert-manager and, via the `issuers`
 # block below, also creates the ClusterIssuer that the rest of the platform
-# references (e.g. `cert-manager.io/cluster-issuer: praxis-form-ovh-dns` on an
+# references (e.g. `cert-manager.io/cluster-issuer: letsencrypt-ovh-prod` on an
 # Ingress). cert-manager then requests Let's Encrypt certificates by solving the
 # DNS01 challenge through the OVH API.
 
 # Unique group name identifying this webhook. Must stay in sync with the issuer
 # that references it (the chart wires this automatically for the issuers below).
-groupName: acme.praxis-form.de
+groupName: acme.infra-x.cloud
 
 # Must match the cert-manager deployment created by the cert-manager Application.
 certManager:
@@ -17,10 +17,10 @@ certManager:
   serviceAccountName: cert-manager
 
 issuers:
-  - name: praxis-form-ovh-dns
+  - name: letsencrypt-ovh-prod
     create: true
     kind: ClusterIssuer
-    email: admin@praxis-form.de
+    email: admin@infra-x.cloud
     acmeServerUrl: https://acme-v02.api.letsencrypt.org/directory
     ovhEndpointName: ovh-eu
     ovhAuthenticationMethod: application
