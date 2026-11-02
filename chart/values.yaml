@@ -2,6 +2,8 @@
 
 global:
   domain: praxis.infra-x.cloud
+  # ClusterIssuer fuer cert-manager (OVH DNS01 Webhook). Muss im Cluster existieren.
+  clusterIssuer: lets-encrypt-prod
 
 ingress:
   enabled: true
@@ -31,21 +33,6 @@ backend:
     limits:
       cpu: "1"
       memory: 1Gi
-  ingress:
-    enabled: true
-    className: nginx
-    annotations:
-      cert-manager.io/cluster-issuer: praxis-form-letsencrypt
-      nginx.ingress.kubernetes.io/rewrite-target: /
-    hosts:
-      - host: kubernetes2.praxis-form.de
-        paths:
-          - path: /api
-            pathType: Prefix
-    tls:
-      - secretName: praxis-form-backend-tls
-        hosts:
-          - kubernetes2.praxis-form.de
 
 # --- Frontend ---
 frontend:
@@ -58,7 +45,7 @@ frontend:
     type: ClusterIP
     port: 80
   env:
-    API_URL: https://kubernetes2.praxis-form.de
+    API_URL: https://praxis.infra-x.cloud
   resources:
     requests:
       cpu: 100m
@@ -68,18 +55,6 @@ frontend:
       memory: 256Mi
   ingress:
     enabled: true
-    className: nginx
-    annotations:
-      cert-manager.io/cluster-issuer: praxis-form-letsencrypt
-    hosts:
-      - host: kubernetes2.praxis-form.de
-        paths:
-          - path: /
-            pathType: Prefix
-    tls:
-      - secretName: praxis-form-frontend-tls
-        hosts:
-          - kubernetes2.praxis-form.de
 
 # --- MongoDB (Bitnami subchart) ---
 mongodb:

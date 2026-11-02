@@ -6,9 +6,14 @@ metadata:
   labels:
     {{- include "praxis-form.labels" . | nindent 4 }}
   annotations:
-{{/*    cert-manager.io/cluster-issuer: {{ .Release.Name }}-letsencrypt-staging*/}}
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    # cert-manager: triggert die automatische TLS-Zertifikatsausstellung (ingress-shim).
+    # Der ClusterIssuer loest den ACME-DNS01-Challenge ueber den OVH-Webhook und legt
+    # das Zertifikat im unten referenzierten tls.secretName ab.
+    cert-manager.io/cluster-issuer: {{ .Values.global.clusterIssuer | quote }}
+    # external-dns: legt den A-Record fuer diesen Host automatisch in der OVH-Zone an.
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.global.domain | quote }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   ingressClassName: nginx
   tls:
