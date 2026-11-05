@@ -18,7 +18,7 @@ spec:
       
   destination:
     server: https://kubernetes.default.svc
-    namespace: praxis
+    namespace: grafana
   syncPolicy:
     automated:
       prune: true

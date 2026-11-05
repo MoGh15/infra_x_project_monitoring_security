@@ -16,5 +16,7 @@ ingress:
       hosts:
         - grafana.infra-x.cloud
 
-adminUser: admin
-adminPassword: testpassword
+admin:
+  existingSecret: ""
+  userKey: admin-user
+  passwordKey: admin-password
