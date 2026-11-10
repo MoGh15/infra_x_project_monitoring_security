@@ -11,11 +11,11 @@ loki:
 
   auth_enabled: false
   commonConfig:
-    replication_factor: "1"
+    replication_factor: 1
   storage:
     type: filesystem
 tableManager:
-  retention_period: "90d"
+  retention_period: 90d
 lokiCanary:
   enabled: false
 test:
