@@ -20,3 +20,15 @@ admin:
   existingSecret: "grafana-admin-password"
   userKey: admin-user
   passwordKey: admin-password
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki.loki.svc.cluster.local:3100
+        isDefault: true
+        jsonData:
+          maxLines: 1000
