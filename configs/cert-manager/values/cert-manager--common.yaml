@@ -1,0 +1,23 @@
+# Common values for the cert-manager ArgoCD Application.
+# Consumed via $values reference from argocd-bootstrap/apps cert-manager Application.
+
+# Install the CRDs together with the chart (required for the OVH webhook and the
+# ClusterIssuer that is created by cert-manager-webhook-ovh).
+crds:
+  enabled: true
+  keep: true
+
+# Deployed into the cert-manager namespace (matches webhook certManager.namespace).
+namespace: cert-manager
+
+# Let cert-manager watch all namespaces for Certificate/Ingress resources.
+global:
+  leaderElection:
+    namespace: cert-manager
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi

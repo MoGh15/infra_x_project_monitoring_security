@@ -1,0 +1,69 @@
+# Default values for praxis-form
+
+global:
+  domain: praxis.infra-x.cloud
+  # ClusterIssuer fuer cert-manager (OVH DNS01 Webhook). Muss im Cluster existieren.
+  clusterIssuer: letsencrypt-ovh-prod
+
+ingress:
+  enabled: true
+
+praxisHost: praxis.infra-x.cloud
+
+# --- Backend ---
+backend:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/mogh15/infra_x_projekt/backend
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+  env:
+    MONGODB_URI: mongodb://praxis-form-mongodb:27017/praxis
+    JWT_EXP_MINUTES: "120"
+  secrets:
+    JWT_SECRET: CHANGE_ME_very_long_secret_at_least_32_chars
+    ADMIN_DEFAULT_PASSWORD: CHANGE_ME
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+# --- Frontend ---
+frontend:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/mogh15/infra_x_projekt/frontend
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 80
+  env:
+    API_URL: https://praxis.infra-x.cloud
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  ingress:
+    enabled: true
+
+# --- MongoDB (Bitnami subchart) ---
+mongodb:
+  image:
+    tag: latest
+  enabled: true
+  auth:
+    enabled: false
+  persistence:
+    enabled: true
+    size: 8Gi
+

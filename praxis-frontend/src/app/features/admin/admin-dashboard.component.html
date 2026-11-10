@@ -1,0 +1,135 @@
+<div class="container">
+  <mat-toolbar color="primary" class="toolbar">
+    <span>Admin Dashboard</span>
+    <span class="spacer"></span>
+
+    <button mat-button (click)="load()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+
+    <button mat-button (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Logout
+    </button>
+  </mat-toolbar>
+
+  <div class="card">
+    <mat-chip-listbox class="filters" [multiple]="false">
+      <mat-chip-option [selected]="filter() === 'ALL'" (click)="setFilter('ALL')">Alle</mat-chip-option>
+      <mat-chip-option [selected]="filter() === 'NEW'" (click)="setFilter('NEW')">NEW</mat-chip-option>
+      <mat-chip-option [selected]="filter() === 'VIEWED'" (click)="setFilter('VIEWED')">VIEWED</mat-chip-option>
+      <mat-chip-option [selected]="filter() === 'DONE'" (click)="setFilter('DONE')">DONE</mat-chip-option>
+    </mat-chip-listbox>
+
+    <div class="state" *ngIf="loading()">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Lade…</span>
+    </div>
+
+    <div class="error" *ngIf="error()">{{ error() }}</div>
+    <div class="table-wrap"
+         *ngIf="!loading() && !error()">
+    <table
+      mat-table
+      [dataSource]="paged()"
+      class="mat-elevation-z1"
+      *ngIf="!loading() && !error()"
+    >
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let s">
+          <mat-chip [ngClass]="s.status.toLowerCase()">{{ s.status }}</mat-chip>
+        </td>
+      </ng-container>
+
+      <!-- NAME + FILTER ICON -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="th-flex">
+            <span>Name</span>
+
+            <button
+              mat-icon-button
+              class="filter-btn"
+              [class.active]="!!nameFilter()"
+              [matMenuTriggerFor]="nameMenu"
+              aria-label="Nach Name filtern"
+              (click)="$event.stopPropagation()">
+              <mat-icon>filter_alt</mat-icon>
+            </button>
+          </div>
+
+          <mat-menu #nameMenu="matMenu" class="name-menu">
+            <div class="menu-pad" (click)="$event.stopPropagation()">
+              <mat-form-field appearance="outline" class="name-filter-field">
+                <mat-label>Name filtern</mat-label>
+                <input
+                  matInput
+                  [value]="nameFilter()"
+                  (input)="setNameFilter($any($event.target).value)"
+                  placeholder="z.B. Thomas"
+                  autocomplete="off"
+                />
+                <button
+                  *ngIf="nameFilter()"
+                  mat-icon-button
+                  matSuffix
+                  aria-label="Filter löschen"
+                  (click)="clearNameFilter($event)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-form-field>
+
+              <div class="menu-hint">
+                Filter bleibt gespeichert.
+              </div>
+            </div>
+          </mat-menu>
+        </th>
+
+        <td mat-cell *matCellDef="let s">{{ displayName(s) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>Erstellt</th>
+        <td mat-cell *matCellDef="let s">{{ s.createdAt | date:'dd.MM.yyyy, HH:mm' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="birthDate">
+        <th mat-header-cell *matHeaderCellDef>Geburtstag</th>
+        <td mat-cell *matCellDef="let s">{{ displayBirthDate(s.patientData?.birthDate) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Aktionen</th>
+        <td mat-cell *matCellDef="let row">
+          <a mat-button color="primary" [routerLink]="['/admin/submissions', row.id]">
+            Details
+          </a>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="empty" *ngIf="totalCount() === 0">
+        <td [attr.colspan]="displayedColumns.length">Keine Einträge.</td>
+      </tr>
+    </table>
+    </div>
+
+    <!-- ✅ Pagination -->
+    <mat-paginator
+      *ngIf="!loading() && !error() && totalCount() > 0"
+      class="paginator"
+      [length]="totalCount()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="pageSizeOptions"
+      showFirstLastButtons
+      (page)="onPage($event)">
+    </mat-paginator>
+
+  </div>
+</div>

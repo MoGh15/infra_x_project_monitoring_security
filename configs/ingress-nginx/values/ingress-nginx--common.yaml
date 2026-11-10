@@ -1,0 +1,24 @@
+# Common values for the ingress-nginx ArgoCD Application.
+# Consumed via $values reference from argocd-bootstrap/apps ingress-nginx Application.
+#
+# The ingress controller is the single HTTP(S) entrypoint. external-dns reads the
+# LoadBalancer address of this controller and creates the matching A/AAAA records
+# in OVH, while cert-manager uses the same ingress class for ACME challenges.
+
+controller:
+  ingressClassResource:
+    name: nginx
+    enabled: true
+    default: true
+  ingressClass: nginx
+  service:
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+  # Expose the real client IP to backends.
+  config:
+    use-forwarded-headers: "true"
+  # Publish the controller address so external-dns can create DNS records.
+  publishService:
+    enabled: true
+  admissionWebhooks:
+    enabled: true

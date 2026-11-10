@@ -1,0 +1,123 @@
+.toolbar { border-radius: 12px; }
+.spacer { flex: 1; }
+
+.card {
+  margin-top: 16px;
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  width: min(1070px, 100%);
+}
+
+.filters { margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+}
+table.mat-mdc-table {
+  width: 100%;
+  min-width: 720px; /* sorgt dafür, dass auf kleinen Screens gescrollt wird */
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Optional: action button kompakter */
+td.mat-mdc-cell a[mat-button] {
+  min-width: auto;
+  padding: 0 8px;
+}
+.state { display: flex; align-items: center; gap: 10px; padding: 12px 0; }
+
+.error { color: #b00020; padding: 8px 0; }
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+mat-chip.new { background: #e3f2fd; }
+mat-chip.viewed { background: #fff8e1; }
+mat-chip.done { background: #e8f5e9; }
+
+.empty td { padding: 18px; opacity: 0.7; text-align: center; }
+
+/* header layout + filter icon */
+.th-flex {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-btn {
+  border-radius: 10px;
+
+  &.active {
+    background: rgba(63, 81, 181, 0.14);
+  }
+}
+
+/* mat-menu content spacing */
+:host ::ng-deep .name-menu .mat-mdc-menu-content {
+  padding: 10px 12px;
+}
+
+.menu-pad { width: 280px; }
+
+.name-filter-field {
+  width: 90%;
+  margin: 10px;
+}
+
+.menu-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  margin-left: 20px;
+  color: rgba(0,0,0,0.6);
+}
+
+/* ✅ paginator */
+.paginator {
+  margin-top: 12px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  padding-top: 8px;
+}
+/* Tablet */
+@media (max-width: 900px) {
+  .card {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  th.mat-mdc-header-cell,
+  td.mat-mdc-cell {
+    padding: 10px 12px;
+  }
+
+  table.mat-mdc-table {
+    min-width: 680px;
+  }
+}
+
+@media (max-width: 600px) {
+  .card {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  /* Chips etwas kleiner */
+  :host ::ng-deep .filters .mat-mdc-chip-option {
+    height: 32px;
+  }
+
+  /* Table scrollt, bleibt lesbar */
+  table.mat-mdc-table {
+    min-width: 0px;
+  }
+
+  /* Paginator: etwas enger */
+  :host ::ng-deep .paginator .mat-mdc-paginator-page-size {
+    margin-right: 6px;
+  }
+}

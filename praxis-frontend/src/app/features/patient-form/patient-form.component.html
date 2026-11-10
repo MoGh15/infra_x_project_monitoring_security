@@ -1,0 +1,444 @@
+<div class="page">
+  <mat-card class="shell">
+    <div class="header">
+      <div>
+        <h1>Patientenformular</h1>
+        <p>Bitte füllen Sie das Formular aus und klicken Sie auf „Absenden“.........</p>
+      </div>
+
+      <button mat-stroked-button type="button" (click)="resetForm()">
+        <mat-icon>restart_alt</mat-icon>
+        Zurücksetzen
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="grid" autocomplete="off">
+
+      <!-- Patient -->
+      <mat-card class="section">
+        <mat-card-title>Patient</mat-card-title>
+
+        <mat-card-content [formGroup]="form.controls.patientData" class="section-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Vorname</mat-label>
+            <input matInput formControlName="firstName" autocomplete="new-password"
+                   name="given-name-ignore"/>
+            <mat-error *ngIf="pd().firstName.touched && pd().firstName.invalid">Pflichtfeld</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nachname</mat-label>
+            <input matInput formControlName="lastName" autocomplete="new-password"
+                   name="family-name-ignore" />
+            <mat-error *ngIf="pd().lastName.touched && pd().lastName.invalid">Pflichtfeld</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Geburtsdatum</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="birthDate"
+              autocomplete="off"
+              readonly
+              inputmode="none"
+              [max]="today"
+            />
+
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+
+            <mat-error *ngIf="pd().birthDate.touched && pd().birthDate.invalid">
+              Pflichtfeld
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Telefon</mat-label>
+            <input matInput formControlName="phone" autocomplete="new-password"
+                   name="phone-ignore"/>
+            <mat-error *ngIf="pd().phone.touched && pd().phone.hasError('phone')">
+              Bitte gültige Telefonnummer eingeben.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>E-Mail</mat-label>
+            <input matInput formControlName="email" autocomplete="new-password"
+                   name="email-ignore"/>
+            <mat-error *ngIf="pd().email.touched && pd().email.invalid">Ungültige E-Mail</mat-error>
+          </mat-form-field>
+
+          <div formGroupName="address" class="address span-2">
+            <mat-form-field appearance="outline" class="span-2">
+              <mat-label>Straße</mat-label>
+              <input matInput formControlName="street" autocomplete="new-password"
+                     name="street-ignore"/>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Hausnummer</mat-label>
+              <input matInput formControlName="houseNumber" autocomplete="new-password"
+                     name="houseNumber-ignore" />
+              <mat-error *ngIf="addr().houseNumber.touched && addr().houseNumber.hasError('pattern')">
+                Ungültige Hausnummer (z. B. 28, 28a, 12-14).
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>PLZ</mat-label>
+              <input
+                matInput
+                formControlName="zip"
+                maxlength="5"
+                inputmode="numeric"
+                autocomplete="new-password"
+                name="zip-ignore"
+              />
+              <mat-error *ngIf="addr().zip.touched && addr().zip.hasError('pattern')">
+                PLZ muss aus 5 Ziffern bestehen.
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Ort</mat-label>
+              <input
+                matInput
+                formControlName="city"
+                [readonly]="cityLocked()"
+                autocomplete="new-password"
+                name="city-ignore"
+              />
+              <mat-hint *ngIf="cityLocked()">Ort wird automatisch vorgeschlagen</mat-hint>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Medizinisch -->
+      <!-- Medizinisch -->
+      <mat-card class="section">
+        <mat-card-title>Medizinisch</mat-card-title>
+
+        <mat-card-content class="medical-block" formGroupName="medical">
+          <!-- SYMPTOME -->
+          <div class="medical-group">
+            <div class="symptom-head">
+              <div>
+                <h3>Symptome & Beschwerden</h3>
+                <p class="muted">Bitte passende Symptome auswaehlen und Details ergaenzen.</p>
+              </div>
+            </div>
+
+            <mat-chip-set class="symptom-grid">
+              <mat-chip-option
+                *ngFor="let opt of symptomCatalog"
+                [selected]="isSymptomSelected(opt.key)"
+                (selectionChange)="onSymptomSelection(opt, $event)">
+                <mat-icon class="chip-ic">{{ opt.icon }}</mat-icon>
+                {{ opt.label }}
+              </mat-chip-option>
+            </mat-chip-set>
+
+            <ng-container *ngIf="(symptomValues$ | async) as symptomValues">
+              <div class="selected-symptoms" *ngIf="symptomValues.length">
+                <div class="meta-label">Ausgewaehlt</div>
+                <mat-chip-set>
+                  <mat-chip *ngFor="let sym of symptomValues">
+                    <mat-icon class="chip-ic">{{ symptomConfig(sym.key).icon }}</mat-icon>
+                    {{ sym.label }}
+                    <button mat-icon-button type="button" (click)="editSymptom(sym); $event.stopPropagation()">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" (click)="removeSymptomByKey(sym.key); $event.stopPropagation()">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+            </ng-container>
+
+            <div class="add-row">
+              <mat-form-field appearance="outline" class="add-input">
+                <mat-label>Weitere Symptome</mat-label>
+                <input matInput [formControl]="extraSymptom" />
+              </mat-form-field>
+
+              <button mat-flat-button color="primary" type="button" class="add-btn"
+                      (click)="addCustomSymptom()">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- ALLERGIEN -->
+          <div class="medical-group">
+            <h3>Allergien</h3>
+
+            <!-- Ausgewählte -->
+            <mat-chip-set class="chips" *ngIf="med().allergies.value.length">
+              <mat-chip
+                *ngFor="let a of med().allergies.value"
+                removable
+                (removed)="removeChip(med().allergies, a)">
+                {{ a }}
+                <button matChipRemove>
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-chip>
+            </mat-chip-set>
+
+            <!-- Vorschläge -->
+            <mat-chip-set class="option-chips">
+              <mat-chip-option
+                *ngFor="let opt of allergyOptions"
+                [selected]="isSelected(med().allergies, opt)"
+                (selectionChange)="toggleFromOptions(med().allergies, opt, $event.selected)">
+                {{ opt }}
+              </mat-chip-option>
+            </mat-chip-set>
+
+            <!-- Eigene hinzufügen -->
+            <div class="add-row">
+              <mat-form-field appearance="outline" class="add-input">
+                <mat-label>Weitere Allergie</mat-label>
+                <input matInput [formControl]="extraAllergy" />
+              </mat-form-field>
+
+              <button mat-flat-button color="primary" type="button" class="add-btn"
+                      (click)="addExtra(med().allergies, extraAllergy)">
+                <mat-icon class="add-icon-btn">add</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- MEDIKAMENTE -->
+          <div class="medical-group">
+            <h3>Medikamente</h3>
+
+            <mat-chip-set class="chips" *ngIf="med().medications.value.length">
+              <mat-chip
+                *ngFor="let m of med().medications.value"
+                removable
+                (removed)="removeChip(med().medications, m)">
+                {{ m }}
+                <button matChipRemove>
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-chip>
+            </mat-chip-set>
+
+            <mat-chip-set class="option-chips">
+              <mat-chip-option
+                *ngFor="let opt of medicationOptions"
+                [selected]="isSelected(med().medications, opt)"
+                (selectionChange)="toggleFromOptions(med().medications, opt, $event.selected)">
+                {{ opt }}
+              </mat-chip-option>
+            </mat-chip-set>
+
+            <div class="add-row">
+              <mat-form-field appearance="outline" class="add-input">
+                <mat-label>Weiteres Medikament</mat-label>
+                <input matInput [formControl]="extraMedication" />
+              </mat-form-field>
+
+              <button  mat-flat-button color="primary" type="button" class="add-btn"
+                      (click)="addExtra(med().medications, extraMedication)">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- VORERKRANKUNGEN -->
+          <div class="medical-group">
+            <h3>Vorerkrankungen</h3>
+
+            <mat-chip-set class="chips" *ngIf="med().preExistingConditions.value.length">
+              <mat-chip
+                *ngFor="let c of med().preExistingConditions.value"
+                removable
+                (removed)="removeChip(med().preExistingConditions, c)">
+                {{ c }}
+                <button matChipRemove>
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-chip>
+            </mat-chip-set>
+
+            <mat-chip-set class="option-chips">
+              <mat-chip-option
+                *ngFor="let opt of conditionOptions"
+                [selected]="isSelected(med().preExistingConditions, opt)"
+                (selectionChange)="toggleFromOptions(med().preExistingConditions, opt, $event.selected)">
+                {{ opt }}
+              </mat-chip-option>
+            </mat-chip-set>
+
+            <div class="add-row">
+              <mat-form-field appearance="outline" class="add-input">
+                <mat-label>Weitere Vorerkrankung</mat-label>
+                <input matInput [formControl]="extraCondition" />
+              </mat-form-field>
+
+              <button mat-flat-button
+                      color="primary"
+                      type="button"
+                      class="add-btn"
+                      (click)="addExtra(med().preExistingConditions, extraCondition)"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
+
+        </mat-card-content>
+      </mat-card>
+
+
+      <!-- Dokumente -->
+      <mat-card class="section">
+        <mat-card-title>Dokumente</mat-card-title>
+
+        <mat-card-content>
+          <div
+            class="upload-area"
+            [class.dragover]="dragActive()"
+            (drop)="onDrop($event)"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+          >
+            <input
+              type="file"
+              multiple
+              accept="image/*,application/pdf"
+              (change)="onFilesSelected($event)"
+              #fileInput
+              hidden
+            />
+
+            <div class="upload-copy">
+              <mat-icon class="upload-icon">cloud_upload</mat-icon>
+              <div>
+                <div class="upload-title">Foto oder PDF hochladen</div>
+                <div class="upload-sub">Z. B. Medikamentenplan, Allergiepass</div>
+              </div>
+            </div>
+
+            <div class="upload-actions">
+              <button mat-stroked-button type="button" (click)="fileInput.click()">
+                Dateien auswählen
+              </button>
+              <span class="upload-hint">Max. 5 Dateien - je 10 MB</span>
+            </div>
+          </div>
+
+          <div class="upload-list" *ngIf="attachments.length">
+            <div class="upload-item" *ngFor="let file of attachments; let i = index">
+              <mat-icon class="file-ic">{{ fileIcon(file) }}</mat-icon>
+              <div class="file-meta">
+                <div class="file-name">{{ file.name }}</div>
+                <div class="file-size">{{ formatFileSize(file.size) }}</div>
+              </div>
+              <button mat-icon-button type="button" (click)="removeAttachment(i)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="upload-status" *ngIf="uploadState() !== 'idle'">
+            <mat-progress-bar
+              *ngIf="uploadState() === 'uploading'"
+              mode="determinate"
+              [value]="uploadProgress()"
+            ></mat-progress-bar>
+            <div class="status-text" [class.ok]="uploadState() === 'success'" [class.err]="uploadState() === 'error'">
+              <ng-container [ngSwitch]="uploadState()">
+                <span *ngSwitchCase="'uploading'">Upload laeuft... {{ uploadProgress() }}%</span>
+                <span *ngSwitchCase="'success'">Upload abgeschlossen</span>
+                <span *ngSwitchCase="'error'">Upload fehlgeschlagen</span>
+              </ng-container>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Einwilligungen -->
+      <mat-card class="section">
+        <mat-card-title>Einwilligungen</mat-card-title>
+
+        <mat-card-content [formGroup]="form.controls.consents" class="consents">
+          <mat-checkbox formControlName="gdprAccepted">
+            Ich stimme der Verarbeitung meiner Daten gemäß DSGVO zu. *
+          </mat-checkbox>
+          <div class="hint" *ngIf="cons().gdprAccepted.touched && cons().gdprAccepted.invalid">
+            Zustimmung ist erforderlich.
+          </div>
+
+          <mat-checkbox formControlName="dataSharingAccepted">
+            Ich stimme der Datenweitergabe (z. B. an Labor/Überweisung) zu.
+          </mat-checkbox>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Unterschrift -->
+      <mat-card class="section signature-section">
+        <mat-card-title>Unterschrift</mat-card-title>
+
+        <mat-card-content [formGroup]="form.controls.signature" class="signature-block">
+          <div class="signature-pad" [class.invalid]="sig().base64.touched && sig().base64.invalid">
+            <div class="signature-hint" *ngIf="!signatureHasInk()">Mit Finger oder Stift unterschreiben</div>
+            <canvas
+              #signatureCanvas
+              class="signature-canvas"
+              (pointerdown)="startSignature($event)"
+              (pointermove)="drawSignature($event)"
+              (pointerup)="endSignature()"
+              (pointerleave)="endSignature()"
+              (pointercancel)="endSignature()"
+            ></canvas>
+          </div>
+
+          <div class="signature-actions">
+            <button mat-stroked-button type="button" (click)="clearSignature()">
+              <mat-icon>delete</mat-icon>
+              Loeschen
+            </button>
+
+            <div class="signature-meta">
+              <div class="signature-state" [class.ok]="signatureReady()">
+                {{ signatureReady() ? 'Unterschrift erfasst' : 'Unterschrift erforderlich' }}
+              </div>
+              <div class="signature-note">Bitte unterschreiben, bevor Sie das Formular absenden.</div>
+            </div>
+          </div>
+
+          <div class="signature-error" *ngIf="sig().base64.touched && sig().base64.invalid">
+            Unterschrift ist erforderlich.
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+          <mat-icon>send</mat-icon>
+          Absenden
+        </button>
+
+        <div class="busy" *ngIf="submitting()">
+          <mat-spinner diameter="22"></mat-spinner>
+          <span>Wird gesendet…</span>
+        </div>
+      </div>
+
+    </form>
+  </mat-card>
+</div>
