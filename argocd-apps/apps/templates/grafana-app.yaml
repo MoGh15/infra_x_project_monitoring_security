@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://grafana-community.github.io/helm-charts/
+      targetRevision: 14.4.0
+      chart: grafana
+      helm:
+        valueFiles:
+          - $myrepo/configs/grafana/values/grafana-values.yaml
+    - repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
+      targetRevision: main
+      ref: myrepo
+    - repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
+      targetRevision: main
+      path: configs/grafana/manifests
+      
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: grafana
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

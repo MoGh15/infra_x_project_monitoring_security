@@ -1,0 +1,22 @@
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: grafana.infra-x.cloud
+    cert-manager.io/cluster-issuer: letsencrypt-ovh-prod
+
+  path: /
+  pathType: Prefix
+
+  hosts:
+    - grafana.infra-x.cloud
+
+  tls:
+    - secretName: grafana-tls
+      hosts:
+        - grafana.infra-x.cloud
+
+admin:
+  existingSecret: "grafana-admin-password"
+  userKey: admin-user
+  passwordKey: admin-password
