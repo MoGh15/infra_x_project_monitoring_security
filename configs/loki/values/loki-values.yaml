@@ -10,3 +10,24 @@ lokiCanary:
   enabled: false
 test:
   enabled: false
+deploymentMode: SingleBinary
+
+singleBinary:
+  replicas: 1
+read:
+  replicas: 0
+
+write:
+  replicas: 0
+
+backend:
+  replicas: 0
+
+chunksCache:
+  enabled: false
+
+resultsCache:
+  enabled: false
+
+gateway:
+  enabled: false
