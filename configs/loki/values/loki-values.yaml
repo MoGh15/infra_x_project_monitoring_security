@@ -1,4 +1,14 @@
-loki: 
+loki:
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
   auth_enabled: false
   commonConfig:
     replication_factor: "1"
@@ -10,7 +20,7 @@ lokiCanary:
   enabled: false
 test:
   enabled: false
-deploymentMode: SingleBinary
+deploymentMode: Monolithic
 
 singleBinary:
   replicas: 1
