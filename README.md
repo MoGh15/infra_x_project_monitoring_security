@@ -269,6 +269,50 @@ image: ${CI_REGISTRY_IMAGE}/backend:latest
 image: ${CI_REGISTRY_IMAGE}/frontend:latest
 ```
 
+### Monitoring (kube-prometheus-stack & Grafana) via ArgoCD
+
+`kube-prometheus-stack` (Prometheus, Node Exporter, Alertmanager with e-mail alerts) and Grafana are
+deployed as ArgoCD Applications (`argocd-apps/apps/templates`, values under `configs/`).
+They are exposed via ingress-nginx (DNS by external-dns, TLS by cert-manager):
+https://grafana.infra-x.cloud, https://prometheus.infra-x.cloud, https://alertmanager.infra-x.cloud.
+Prometheus and Alertmanager have no authentication; optional Basic Auth annotations are prepared
+(commented out) in `configs/kube-prometheus-stack/values/kube-prometheus-stack-values.yaml`.
+Use `scripte/deployment.sh` to deploy them from the **currently checked-out and pushed** branch
+(on Windows run it with Git Bash):
+
+```bash
+CTX=kubernetes-admin@infra-x-monitoring-security
+
+# 1. Only needed once, if the Application does not exist on the cluster yet:
+#    renders the app-of-apps from the branch so that "kube-prometheus-stack" is created
+scripte/deployment.sh --typ normal --application app-of-apps --environment "$CTX"
+
+# 2. Deploy kube-prometheus-stack and Grafana from the branch
+scripte/deployment.sh --typ normal --application kube-prometheus-stack --environment "$CTX" --timeout 600
+scripte/deployment.sh --typ normal --application grafana --environment "$CTX"
+```
+
+For child apps the script disables `selfHeal` on `app-of-apps`, so the branch revision is not
+reset. After merging, switch back to `main`:
+
+```bash
+kubectl --context "$CTX" patch application app-of-apps -n argocd --type merge \
+  -p '{"spec":{"source":{"targetRevision":"main"},"syncPolicy":{"automated":{"selfHeal":true}}}}'
+```
+
+#### Send a test alert by e-mail
+
+Fires a test alert directly in Alertmanager (via `amtool`). It is delivered to the recipients
+configured in `configs/kube-prometheus-stack/values/kube-prometheus-stack-values.yaml`
+(`alertmanager.config.receivers`) within ~30s; a "resolved" mail follows after ~5 minutes.
+
+```bash
+kubectl --context "$CTX" -n monitoring exec alertmanager-prometheus-kube-prometheus-alertmanager-0 -c alertmanager -- \
+  amtool alert add "TestEmailAlert-$(date +%s)" severity=warning namespace=monitoring \
+  --annotation='summary="Test alert: Alertmanager e-mail delivery"' \
+  --alertmanager.url=http://localhost:9093
+```
+
 ### Recommended Production Stack
 
 ```
