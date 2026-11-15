@@ -21,7 +21,28 @@ kubeStateMetrics:
 
 prometheus:
   enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: prometheus.infra-x.cloud
+      cert-manager.io/cluster-issuer: letsencrypt-ovh-prod
+      # Basic Auth (optional): Secret "prometheus-basic-auth" mit Key "auth"
+      # (htpasswd-Format) als SealedSecret unter manifests/ anlegen und aktivieren.
+      # nginx.ingress.kubernetes.io/auth-type: basic
+      # nginx.ingress.kubernetes.io/auth-secret: prometheus-basic-auth
+      # nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+    hosts:
+      - prometheus.infra-x.cloud
+    paths:
+      - /
+    pathType: Prefix
+    tls:
+      - secretName: prometheus-tls
+        hosts:
+          - prometheus.infra-x.cloud
   prometheusSpec:
+    externalUrl: https://prometheus.infra-x.cloud
     retention: 15d
     # ServiceMonitors/PodMonitors/Rules aus allen Namespaces einsammeln,
     # nicht nur die mit dem Release-Label.
@@ -39,7 +60,28 @@ prometheus:
 
 alertmanager:
   enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: alertmanager.infra-x.cloud
+      cert-manager.io/cluster-issuer: letsencrypt-ovh-prod
+      # Basic Auth (optional): Secret "alertmanager-basic-auth" mit Key "auth"
+      # (htpasswd-Format) als SealedSecret unter manifests/ anlegen und aktivieren.
+      # nginx.ingress.kubernetes.io/auth-type: basic
+      # nginx.ingress.kubernetes.io/auth-secret: alertmanager-basic-auth
+      # nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+    hosts:
+      - alertmanager.infra-x.cloud
+    paths:
+      - /
+    pathType: Prefix
+    tls:
+      - secretName: alertmanager-tls
+        hosts:
+          - alertmanager.infra-x.cloud
   alertmanagerSpec:
+    externalUrl: https://alertmanager.infra-x.cloud
     # Wird unter /etc/alertmanager/secrets/alertmanager-smtp/ gemountet
     # (SealedSecret aus configs/kube-prometheus-stack/manifests).
     secrets:
