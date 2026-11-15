@@ -2,6 +2,7 @@ package mohammad.development.praxis.controllers;
 
 import mohammad.development.praxis.DTOs.AdminSubmissionUpdateRequest;
 import mohammad.development.praxis.DTOs.UpdateStatusRequest;
+import mohammad.development.praxis.modules.metrics.PraxisMetrics;
 import mohammad.development.praxis.modules.patient.*;
 import mohammad.development.praxis.repos.SubmissionRepository;
 import org.bson.types.ObjectId;
@@ -35,6 +36,9 @@ class AdminSubmissionControllerTest {
 
     @Mock
     private GridFsTemplate gridFsTemplate;
+
+    @Mock
+    private PraxisMetrics metrics;
 
     @InjectMocks
     private AdminSubmissionController controller;
@@ -157,6 +161,7 @@ class AdminSubmissionControllerTest {
         Submission result = controller.updateStatus("test-id-123", statusRequest);
 
         assertEquals(SubmissionStatus.DONE, result.getStatus());
+        verify(metrics).statusChanged(testSubmission, SubmissionStatus.NEW, SubmissionStatus.DONE);
     }
 
     @Test

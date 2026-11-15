@@ -3,6 +3,7 @@ package mohammad.development.praxis.controllers;
 import mohammad.development.praxis.DTOs.LoginRequest;
 import mohammad.development.praxis.DTOs.LoginResponse;
 import mohammad.development.praxis.modules.admin.JwtService;
+import mohammad.development.praxis.modules.metrics.PraxisMetrics;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +19,7 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,6 +30,9 @@ class AuthControllerTest {
 
     @Mock
     private JwtService jwtService;
+
+    @Mock
+    private PraxisMetrics metrics;
 
     @InjectMocks
     private AuthController controller;
@@ -45,6 +50,7 @@ class AuthControllerTest {
         LoginResponse result = controller.login(loginRequest);
 
         assertEquals("test-jwt-token", result.getAccessToken());
+        verify(metrics).adminLogin(true);
     }
 
     @Test
@@ -57,6 +63,7 @@ class AuthControllerTest {
                 .thenThrow(new BadCredentialsException("Invalid credentials"));
 
         assertThrows(ResponseStatusException.class, () -> controller.login(loginRequest));
+        verify(metrics).adminLogin(false);
     }
 
     @Test

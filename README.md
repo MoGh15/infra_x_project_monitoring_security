@@ -313,6 +313,32 @@ kubectl --context "$CTX" -n monitoring exec alertmanager-prometheus-kube-prometh
   --alertmanager.url=http://localhost:9093
 ```
 
+#### Praxis application metrics
+
+The backend exposes Micrometer metrics on a **separate management port (8081)**, which is not routed
+by the public ingress: `http://<pod>:8081/actuator/prometheus` (health: `:8081/actuator/health`).
+The `chart/` deploys a `ServiceMonitor`, a `PrometheusRule` and a Grafana dashboard ConfigMap
+(toggle via `metrics.*` in `chart/values.yaml`). The Grafana sidecar imports the dashboard into the folder *Praxis*.
+
+| Metric | Type | Labels | Meaning |
+|---|---|---|---|
+| `praxis_submissions_created_total` | counter | `form_version`, `has_attachments` | Submitted patient forms |
+| `praxis_submissions_rejected_total` | counter | `reason` | Rejected submissions (signature_missing, signature_invalid, too_many_files, empty_file, file_too_large, unsupported_file_type, upload_failed) |
+| `praxis_submission_attachments_total` | counter | `content_type` | Uploaded attachments |
+| `praxis_submission_attachment_size_bytes` | summary | – | Attachment size |
+| `praxis_submissions_by_status` | gauge | `status` | Current submissions per status (NEW, VIEWED, DONE) |
+| `praxis_submissions_oldest_new_age_seconds` | gauge | – | Age of the oldest unprocessed (NEW) submission |
+| `praxis_submission_status_changes_total` | counter | `from`, `to` | Status transitions by staff |
+| `praxis_submission_time_to_done_seconds` | histogram | – | Time from submission until DONE |
+| `praxis_admin_logins_total` | counter | `result` | Admin logins (success / failure) |
+| `praxis_admin_attachment_downloads_total` | counter | – | Attachments opened by staff |
+| `praxis_sse_connected_clients` | gauge | – | Admin dashboards connected for live updates |
+
+Labels never contain patient data. Alerts: `PraxisBackendDown`, `PraxisSubmissionWaitingTooLong` (> 24h in NEW),
+`PraxisHighSubmissionRejectionRate` (> 20 % in 1h), `PraxisManyFailedAdminLogins` (> 10 in 15 min).
+
+Check locally (Docker Compose): `curl http://localhost:8081/actuator/prometheus | grep praxis_`
+
 ### Recommended Production Stack
 
 ```

@@ -13,6 +13,10 @@ public class SseHub {
 
     private final Set<SseEmitter> emitters = ConcurrentHashMap.newKeySet();
 
+    public int getConnectedClients() {
+        return emitters.size();
+    }
+
     public SseEmitter register() {
         SseEmitter emitter = new SseEmitter(0L); // kein Timeout
         emitters.add(emitter);

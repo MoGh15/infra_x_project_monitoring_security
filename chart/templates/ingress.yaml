@@ -31,13 +31,6 @@ spec:
                 name: {{ .Release.Name }}-backend
                 port:
                   number: {{ .Values.backend.service.port }}
-          - path: /actuator
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ .Release.Name }}-backend
-                port:
-                  number: {{ .Values.backend.service.port }}
           - path: /
             pathType: Prefix
             backend:

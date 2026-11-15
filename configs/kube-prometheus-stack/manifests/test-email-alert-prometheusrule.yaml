@@ -1,0 +1,31 @@
+# Test-Alert für den E-Mail-Versand über Alertmanager.
+#
+# Aktivieren: alle Zeilen unterhalb dieses Blocks einkommentieren, committen & pushen,
+# dann deployen:
+#   scripte/deployment.sh --typ normal --application kube-prometheus-stack \
+#     --environment kubernetes-admin@infra-x-monitoring-security --timeout 600
+#
+# Der Alert feuert dauerhaft (expr: vector(1)). Die erste Mail kommt ca. 1-2 Minuten
+# nach dem Deploy, danach erneut alle 12h (repeat_interval).
+# Deaktivieren: wieder auskommentieren und deployen. ArgoCD löscht die Regel (prune),
+# danach kommt eine "resolved"-Mail.
+#
+# ---
+# apiVersion: monitoring.coreos.com/v1
+# kind: PrometheusRule
+# metadata:
+#   name: test-email-alert
+#   namespace: monitoring
+# spec:
+#   groups:
+#     - name: test-email-alert
+#       rules:
+#         - alert: TestEmailAlert
+#           expr: vector(1)
+#           for: 1m
+#           labels:
+#             severity: warning
+#             namespace: monitoring
+#           annotations:
+#             summary: "Test alert: Alertmanager e-mail delivery"
+#             description: "Dieser Alert dient nur zum Testen des E-Mail-Versands (configs/kube-prometheus-stack/manifests/test-email-alert-prometheusrule.yaml)."

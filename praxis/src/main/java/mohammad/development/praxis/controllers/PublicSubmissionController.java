@@ -2,6 +2,7 @@ package mohammad.development.praxis.controllers;
 
 import mohammad.development.praxis.DTOs.SubmissionCreateRequest;
 import mohammad.development.praxis.modules.admin.SseHub;
+import mohammad.development.praxis.modules.metrics.PraxisMetrics;
 import mohammad.development.praxis.modules.patient.Submission;
 import mohammad.development.praxis.modules.patient.SubmissionStatus;
 import mohammad.development.praxis.modules.patient.SubmissionAttachment;
@@ -29,6 +30,7 @@ public class PublicSubmissionController {
 
     private final SubmissionRepository submissionRepository;
     private final GridFsTemplate gridFsTemplate;
+    private final PraxisMetrics metrics;
 
     private static final long MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
     private static final int MAX_FILES = 5;
@@ -42,11 +44,13 @@ public class PublicSubmissionController {
     public PublicSubmissionController(
             SseHub hub,
             SubmissionRepository submissionRepository,
-            GridFsTemplate gridFsTemplate
+            GridFsTemplate gridFsTemplate,
+            PraxisMetrics metrics
     ) {
         this.hub = hub;
         this.submissionRepository = submissionRepository;
         this.gridFsTemplate = gridFsTemplate;
+        this.metrics = metrics;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -55,8 +59,8 @@ public class PublicSubmissionController {
         validateSignature(req.getSignature());
         Submission sAfterSave = submissionRepository.save(buildSubmission(req));
         hub.sendCreated(sAfterSave);
+        metrics.submissionCreated(sAfterSave.getFormVersion(), false);
         return sAfterSave;
-
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -71,6 +75,7 @@ public class PublicSubmissionController {
         Submission sAfterSave = submissionRepository.save(buildSubmission(req));
         if (files == null || files.isEmpty()) {
             hub.sendCreated(sAfterSave);
+            metrics.submissionCreated(sAfterSave.getFormVersion(), false);
             return sAfterSave;
         }
 
@@ -99,12 +104,14 @@ public class PublicSubmissionController {
         } catch (Exception ex) {
             cleanupFiles(attachments);
             submissionRepository.deleteById(sAfterSave.getId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File upload failed");
+            throw reject("upload_failed", "File upload failed");
         }
 
         sAfterSave.setAttachments(attachments);
         sAfterSave = submissionRepository.save(sAfterSave);
         hub.sendCreated(sAfterSave);
+        attachments.forEach(a -> metrics.attachmentUploaded(a.getContentType(), a.getSize()));
+        metrics.submissionCreated(sAfterSave.getFormVersion(), !attachments.isEmpty());
         return sAfterSave;
     }
 
@@ -123,32 +130,37 @@ public class PublicSubmissionController {
     private void validateFiles(List<MultipartFile> files) {
         if (files == null || files.isEmpty()) return;
         if (files.size() > MAX_FILES) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too many files");
+            throw reject("too_many_files", "Too many files");
         }
         for (MultipartFile file : files) {
             if (file == null || file.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Empty file");
+                throw reject("empty_file", "Empty file");
             }
             if (file.getSize() > MAX_FILE_SIZE_BYTES) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File too large");
+                throw reject("file_too_large", "File too large");
             }
             String contentType = file.getContentType();
             if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported file type");
+                throw reject("unsupported_file_type", "Unsupported file type");
             }
         }
     }
 
     private void validateSignature(Signature signature) {
         if (signature == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Signature required");
+            throw reject("signature_missing", "Signature required");
         }
         if (signature.getContentType() == null || signature.getContentType().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Signature contentType required");
+            throw reject("signature_invalid", "Signature contentType required");
         }
         if (signature.getBase64() == null || signature.getBase64().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Signature data required");
+            throw reject("signature_invalid", "Signature data required");
         }
+    }
+
+    private ResponseStatusException reject(String reason, String message) {
+        metrics.submissionRejected(reason);
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
     }
 
     private void cleanupFiles(List<SubmissionAttachment> attachments) {

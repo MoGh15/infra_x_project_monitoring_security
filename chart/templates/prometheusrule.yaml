@@ -1,0 +1,65 @@
+{{- if .Values.metrics.prometheusRule.enabled }}
+{{- $job := printf "%s-backend" .Release.Name }}
+{{- $ns := .Release.Namespace }}
+{{- $cfg := .Values.metrics.prometheusRule }}
+# Fachliche und technische Alerts fuer die Praxis-App. Versand per E-Mail ueber den Alertmanager.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-backend
+  labels:
+    app: backend
+    {{- include "praxis-form.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: praxis.availability
+      rules:
+        - alert: PraxisBackendDown
+          expr: up{job="{{ $job }}", namespace="{{ $ns }}"} == 0 or absent(up{job="{{ $job }}", namespace="{{ $ns }}"})
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Praxis backend is not reachable for Prometheus
+            description: The metrics endpoint of {{ $job }} in namespace {{ $ns }} could not be scraped for 5 minutes.
+
+    - name: praxis.business
+      rules:
+        - alert: PraxisSubmissionWaitingTooLong
+          expr: max(praxis_submissions_oldest_new_age_seconds{namespace="{{ $ns }}"}) > {{ $cfg.oldestNewSubmissionSeconds }}
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: A patient form has not been processed in time
+            description: '{{`The oldest submission in status NEW is {{ $value | humanizeDuration }} old.`}}'
+
+        - alert: PraxisHighSubmissionRejectionRate
+          expr: |
+            (
+              sum(increase(praxis_submissions_rejected_total{namespace="{{ $ns }}"}[1h]))
+              /
+              (
+                sum(increase(praxis_submissions_rejected_total{namespace="{{ $ns }}"}[1h]))
+                + sum(increase(praxis_submissions_created_total{namespace="{{ $ns }}"}[1h]))
+              )
+            ) * 100 > {{ $cfg.rejectionRatioPercent }}
+            and
+            sum(increase(praxis_submissions_rejected_total{namespace="{{ $ns }}"}[1h])) > 5
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Many patient form submissions are rejected
+            description: '{{`{{ $value | printf "%.0f" }}% of submissions were rejected in the last hour (check signature / upload validation).`}}'
+
+    - name: praxis.security
+      rules:
+        - alert: PraxisManyFailedAdminLogins
+          expr: sum(increase(praxis_admin_logins_total{namespace="{{ $ns }}", result="failure"}[15m])) > {{ $cfg.failedLoginsThreshold }}
+          labels:
+            severity: warning
+          annotations:
+            summary: Unusually many failed admin logins
+            description: '{{`{{ $value | printf "%.0f" }} failed admin logins in the last 15 minutes (possible brute-force attempt).`}}'
+{{- end }}

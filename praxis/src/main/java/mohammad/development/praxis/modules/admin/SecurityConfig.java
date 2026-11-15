@@ -35,6 +35,8 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health").permitAll()
+                        // Served on the management port (8081), which is not routed by the ingress.
+                        .requestMatchers("/actuator/prometheus").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/submissions/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()

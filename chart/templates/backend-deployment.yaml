@@ -20,8 +20,13 @@ spec:
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+            - name: http-metrics
+              containerPort: {{ .Values.backend.managementPort }}
           env:
+            - name: MANAGEMENT_PORT
+              value: {{ .Values.backend.managementPort | quote }}
             - name: MONGODB_URI
               value: {{ .Values.backend.env.MONGODB_URI | quote }}
             - name: JWT_EXP_MINUTES
@@ -41,13 +46,13 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health
-              port: 8080
+              port: http-metrics
             initialDelaySeconds: 20
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /actuator/health
-              port: 8080
+              port: http-metrics
             initialDelaySeconds: 30
             periodSeconds: 15
 

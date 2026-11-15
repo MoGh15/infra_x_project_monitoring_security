@@ -1,0 +1,15 @@
+{{- if .Values.metrics.grafanaDashboard.enabled }}
+# Wird vom Grafana-Sidecar (configs/grafana/values/grafana-values.yaml) automatisch importiert.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-dashboard
+  labels:
+    {{ .Values.metrics.grafanaDashboard.label }}: {{ .Values.metrics.grafanaDashboard.labelValue | quote }}
+    {{- include "praxis-form.labels" . | nindent 4 }}
+  annotations:
+    grafana_folder: {{ .Values.metrics.grafanaDashboard.folder | quote }}
+data:
+  praxis-overview.json: |-
+{{ .Files.Get "dashboards/praxis-overview.json" | indent 4 }}
+{{- end }}

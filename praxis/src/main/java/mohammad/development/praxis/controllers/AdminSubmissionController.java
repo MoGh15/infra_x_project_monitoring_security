@@ -2,6 +2,7 @@ package mohammad.development.praxis.controllers;
 
 import mohammad.development.praxis.DTOs.AdminSubmissionUpdateRequest;
 import mohammad.development.praxis.DTOs.UpdateStatusRequest;
+import mohammad.development.praxis.modules.metrics.PraxisMetrics;
 import mohammad.development.praxis.modules.patient.Submission;
 import mohammad.development.praxis.modules.patient.SubmissionStatus;
 import mohammad.development.praxis.modules.patient.SubmissionAttachment;
@@ -28,10 +29,14 @@ public class AdminSubmissionController {
 
     private final SubmissionRepository submissionRepository;
     private final GridFsTemplate gridFsTemplate;
+    private final PraxisMetrics metrics;
 
-    public AdminSubmissionController(SubmissionRepository submissionRepository, GridFsTemplate gridFsTemplate) {
+    public AdminSubmissionController(SubmissionRepository submissionRepository,
+                                     GridFsTemplate gridFsTemplate,
+                                     PraxisMetrics metrics) {
         this.submissionRepository = submissionRepository;
         this.gridFsTemplate = gridFsTemplate;
+        this.metrics = metrics;
     }
 
     // GET /api/admin/submissions?status=NEW
@@ -75,8 +80,11 @@ public class AdminSubmissionController {
         Submission s = submissionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found"));
 
+        SubmissionStatus previous = s.getStatus();
         s.setStatus(req.getStatus());
-        return submissionRepository.save(s);
+        Submission saved = submissionRepository.save(s);
+        metrics.statusChanged(s, previous, req.getStatus());
+        return saved;
     }
 
     // GET /api/admin/submissions/{id}/attachments/{attachmentId}
@@ -97,6 +105,7 @@ public class AdminSubmissionController {
         }
 
         GridFsResource resource = gridFsTemplate.getResource(file);
+        metrics.attachmentDownloaded();
         String contentType = attachment.getContentType() != null
                 ? attachment.getContentType()
                 : MediaType.APPLICATION_OCTET_STREAM_VALUE;
