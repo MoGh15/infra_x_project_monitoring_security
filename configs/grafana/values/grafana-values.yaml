@@ -32,3 +32,18 @@ datasources:
         isDefault: true
         jsonData:
           maxLines: 1000
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+        jsonData:
+          timeInterval: 30s
+      - name: Alertmanager
+        uid: alertmanager
+        type: alertmanager
+        access: proxy
+        url: http://prometheus-kube-prometheus-alertmanager.monitoring.svc.cluster.local:9093
+        jsonData:
+          implementation: prometheus
+          handleGrafanaManagedAlerts: false

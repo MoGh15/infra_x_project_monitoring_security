@@ -144,12 +144,19 @@ else
 fi
 ok "targetRevision von '${APPLICATION}' auf '${BRANCH}' gesetzt."
 
-# Hinweis: Child-Apps werden von ${PARENT_APP} verwaltet (selfHeal). Will man die
-# gesamte Stack-Definition aus dem Branch testen, die --application ${PARENT_APP}
-# wählen, damit die Branch-Revision nicht vom Parent zurückgesetzt wird.
+# Child-Apps werden von ${PARENT_APP} verwaltet. Dessen selfHeal würde die gepatchte
+# Branch-Revision sofort wieder auf den Git-Stand zurücksetzen. Daher selfHeal des
+# Parents deaktivieren, solange auf dem Branch getestet wird.
 if [[ "$APPLICATION" != "$PARENT_APP" ]]; then
-  warn "'${APPLICATION}' wird von '${PARENT_APP}' verwaltet; selfHeal kann die Revision"
-  warn "zurücksetzen. Für Stack-weites Branch-Testing --application ${PARENT_APP} nutzen."
+  if kubectl get application "$PARENT_APP" -n "$NS" >/dev/null 2>&1; then
+    log "Deaktiviere selfHeal von '${PARENT_APP}', damit die Branch-Revision erhalten bleibt ..."
+    kubectl patch application "$PARENT_APP" -n "$NS" --type merge \
+      -p '{"spec":{"syncPolicy":{"automated":{"selfHeal":false}}}}' >/dev/null
+    warn "selfHeal von '${PARENT_APP}' ist deaktiviert. Nach dem Testen wiederherstellen, z.B.:"
+    warn "  kubectl patch application ${PARENT_APP} -n ${NS} --type merge -p '{\"spec\":{\"syncPolicy\":{\"automated\":{\"selfHeal\":true}}}}'"
+  else
+    warn "Parent-App '${PARENT_APP}' nicht gefunden; selfHeal wird nicht angepasst."
+  fi
 fi
 
 # --- Sync auslösen (per kubectl: refresh + .operation) ------------------------
@@ -158,9 +165,13 @@ if [[ "$DO_SYNC" == "true" ]]; then
   kubectl annotate application "$APPLICATION" -n "$NS" \
     argocd.argoproj.io/refresh=hard --overwrite >/dev/null
 
-  log "Löse Sync aus ..."
+  # syncOptions der Application (z.B. ServerSideApply=true) übernehmen, da die
+  # Optionen der Operation die der Application für diesen Sync ersetzen.
+  SYNC_OPTIONS="$(echo "$APP_JSON" | jq -c '((.spec.syncPolicy.syncOptions // []) + ["CreateNamespace=true"]) | unique')"
+
+  log "Löse Sync aus (syncOptions: ${SYNC_OPTIONS}) ..."
   kubectl patch application "$APPLICATION" -n "$NS" --type merge -p \
-    "{\"operation\":{\"initiatedBy\":{\"username\":\"deployment.sh\"},\"info\":[{\"name\":\"Reason\",\"value\":\"dev branch deploy: ${BRANCH}\"}],\"sync\":{\"syncOptions\":[\"CreateNamespace=true\"]}}}" >/dev/null
+    "{\"operation\":{\"initiatedBy\":{\"username\":\"deployment.sh\"},\"info\":[{\"name\":\"Reason\",\"value\":\"dev branch deploy: ${BRANCH}\"}],\"sync\":{\"syncOptions\":${SYNC_OPTIONS}}}}" >/dev/null
   ok "Sync-Operation für '${APPLICATION}' gestartet."
 
   if [[ "$DO_WAIT" == "true" ]]; then
