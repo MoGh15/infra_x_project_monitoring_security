@@ -2,6 +2,7 @@ package mohammad.development.praxis.controllers;
 
 import mohammad.development.praxis.DTOs.SubmissionCreateRequest;
 import mohammad.development.praxis.modules.admin.SseHub;
+import mohammad.development.praxis.modules.metrics.PraxisMetrics;
 import mohammad.development.praxis.modules.patient.*;
 import mohammad.development.praxis.repos.SubmissionRepository;
 import org.bson.types.ObjectId;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -38,6 +40,9 @@ class PublicSubmissionControllerTest {
 
     @Mock
     private SseHub sseHub;
+
+    @Mock
+    private PraxisMetrics metrics;
 
     @InjectMocks
     private PublicSubmissionController controller;
@@ -102,6 +107,7 @@ class PublicSubmissionControllerTest {
         assertEquals(SubmissionStatus.NEW, result.getStatus());
         assertEquals("Max", result.getPatientData().getFirstName());
         verify(sseHub, times(1)).sendCreated(any());
+        verify(metrics).submissionCreated("v1", false);
     }
 
     @Test
@@ -126,6 +132,8 @@ class PublicSubmissionControllerTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> controller.submit(validRequest));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        verify(metrics).submissionRejected("signature_missing");
+        verify(metrics, never()).submissionCreated(anyString(), anyBoolean());
     }
 
     @Test

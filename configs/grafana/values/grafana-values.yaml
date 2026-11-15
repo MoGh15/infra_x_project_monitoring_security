@@ -47,3 +47,15 @@ datasources:
         jsonData:
           implementation: prometheus
           handleGrafanaManagedAlerts: false
+
+sidecar:
+  # Laedt Dashboards automatisch aus ConfigMaps mit Label grafana_dashboard=1 (alle Namespaces),
+  # z.B. das Praxis-Dashboard aus chart/templates/grafana-dashboard-configmap.yaml.
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    labelValue: "1"
+    searchNamespace: ALL
+    folderAnnotation: grafana_folder
+    provider:
+      foldersFromFilesStructure: true

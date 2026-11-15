@@ -23,6 +23,7 @@ services:
     container_name: praxis-backend
     ports:
       - "8080:8080"
+      - "8081:8081"  # actuator: /actuator/health, /actuator/prometheus
     environment:
       MONGODB_URI: mongodb://mongodb:27017/praxis
       JWT_SECRET: CHANGE_ME_very_long_secret_at_least_32_chars

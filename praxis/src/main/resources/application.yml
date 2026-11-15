@@ -17,11 +17,17 @@ server:
   port: 8080
 
 management:
+  # Separate port for actuator (health + prometheus) so it is not exposed via the public ingress.
+  server:
+    port: ${MANAGEMENT_PORT:8081}
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus
   endpoint:
     health:
       show-details: never
+  metrics:
+    tags:
+      application: praxis
 

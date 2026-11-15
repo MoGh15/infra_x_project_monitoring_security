@@ -20,6 +20,8 @@ backend:
   service:
     type: ClusterIP
     port: 8080
+  # Actuator (health + prometheus) laeuft auf eigenem Port und wird NICHT ueber den Ingress veroeffentlicht.
+  managementPort: 8081
   env:
     MONGODB_URI: mongodb://praxis-form-mongodb:27017/praxis
     JWT_EXP_MINUTES: "120"
@@ -33,6 +35,28 @@ backend:
     limits:
       cpu: "1"
       memory: 1Gi
+
+# --- Monitoring (kube-prometheus-stack / Grafana) ---
+# Benoetigt die CRDs von kube-prometheus-stack (ServiceMonitor, PrometheusRule).
+metrics:
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+  prometheusRule:
+    enabled: true
+    # Alert wenn eine Einreichung laenger als X Sekunden im Status NEW liegt (Default 24h)
+    oldestNewSubmissionSeconds: 86400
+    # Alert bei mehr als X fehlgeschlagenen Admin-Logins in 15 Minuten
+    failedLoginsThreshold: 10
+    # Alert wenn mehr als X Prozent der Einreichungen in 1h abgelehnt werden
+    rejectionRatioPercent: 20
+  grafanaDashboard:
+    enabled: true
+    # Der Grafana-Sidecar sucht ConfigMaps mit diesem Label in allen Namespaces
+    label: grafana_dashboard
+    labelValue: "1"
+    folder: Praxis
 
 # --- Frontend ---
 frontend:
