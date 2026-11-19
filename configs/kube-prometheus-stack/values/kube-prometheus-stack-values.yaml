@@ -1,0 +1,59 @@
+grafana:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeProxy:
+  enabled: false
+
+prometheus:
+  ingress:
+    enabled: true
+      
+    ingressClassName: nginx
+
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: prometheus.infra-x.cloud
+      cert-manager.io/cluster-issuer: letsencrypt-ovh-prod
+
+
+    hosts:
+      - prometheus.infra-x.cloud
+
+    paths:
+      - /
+
+    pathType: Prefix
+
+    tls:
+      - secretName: prometheus-general-tls
+        hosts:
+          - prometheus.infra-x.cloud
+  
+  prometheusSpec:
+    externalUrl: https://prometheus.infra-x.cloud
+    retention: 15d
+
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+    podMonitorSelectorNilUsesHelmValues: false
+    
+    ruleSelectorNilUsesHelmValues: false
+    
+    probeSelectorNilUsesHelmValues: false
+
+    storageSpec:
+
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi

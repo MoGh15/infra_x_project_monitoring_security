@@ -32,3 +32,9 @@ datasources:
         isDefault: true
         jsonData:
           maxLines: 1000
+
+      - name: prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
