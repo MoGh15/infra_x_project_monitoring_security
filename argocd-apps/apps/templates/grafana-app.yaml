@@ -13,7 +13,7 @@ spec:
         valueFiles:
           - $myrepo/configs/grafana/values/grafana-values.yaml
     - repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
-      targetRevision: main
+      targetRevision: kube-prometheus-stack
       ref: myrepo
     - repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
       targetRevision: main
