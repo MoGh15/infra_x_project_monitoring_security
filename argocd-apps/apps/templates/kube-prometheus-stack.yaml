@@ -14,7 +14,7 @@ spec:
           - $myrepo/configs/kube-prometheus-stack/values/kube-prometheus-stack-values.yaml
           
     - repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
-      targetRevision: kube-prometheus-stack
+      targetRevision: main
       ref: myrepo
       
   destination:
