@@ -49,7 +49,7 @@ prometheus:
     
     probeSelectorNilUsesHelmValues: false
 
-    storageSpec: {}
+    storageSpec:
 
       volumeClaimTemplate:
         spec:
