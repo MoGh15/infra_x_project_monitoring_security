@@ -17,13 +17,12 @@ prometheus:
   ingress:
     enabled: true
       
-    ingressClassName: "nginx"
+    ingressClassName: nginx
 
     annotations:
       external-dns.alpha.kubernetes.io/hostname: prometheus.infra-x.cloud
       cert-manager.io/cluster-issuer: letsencrypt-ovh-prod
 
-    labels: {}
 
     hosts:
       - prometheus.infra-x.cloud
