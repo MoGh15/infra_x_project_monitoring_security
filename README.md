@@ -307,7 +307,7 @@ configured in `configs/kube-prometheus-stack/values/kube-prometheus-stack-values
 (`alertmanager.config.receivers`) within ~30s; a "resolved" mail follows after ~5 minutes.
 
 ```bash
-kubectl --context "$CTX" -n monitoring exec alertmanager-prometheus-kube-prometheus-alertmanager-0 -c alertmanager -- \
+kubectl --context "$CTX" -n monitoring exec alertmanager-kube-prometheus-stack-alertmanager-0 -c alertmanager -- \
   amtool alert add "TestEmailAlert-$(date +%s)" severity=warning namespace=monitoring \
   --annotation='summary="Test alert: Alertmanager e-mail delivery"' \
   --alertmanager.url=http://localhost:9093

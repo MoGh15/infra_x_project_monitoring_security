@@ -10,8 +10,6 @@ spec:
       targetRevision: 93.3.0
       chart: kube-prometheus-stack
       helm:
-        # Übernimmt den bestehenden Stack im Namespace monitoring (gleiche Ressourcennamen).
-        releaseName: prometheus
         valueFiles:
           - $myrepo/configs/kube-prometheus-stack/values/kube-prometheus-stack-values.yaml
     - repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
