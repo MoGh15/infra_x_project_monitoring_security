@@ -339,6 +339,20 @@ Labels never contain patient data. Alerts: `PraxisBackendDown`, `PraxisSubmissio
 
 Check locally (Docker Compose): `curl http://localhost:8081/actuator/prometheus | grep praxis_`
 
+#### Build & push the praxis images manually (GHCR)
+
+Same naming as the CI (`.github/workflows/ci-cd.yml`): tag = full git commit SHA + `latest`.
+Afterwards set `backend.image.tag` / `frontend.image.tag` in `chart/values.yaml` to the SHA.
+
+```bash
+docker login ghcr.io
+REPO=ghcr.io/mogh15/infra_x_project_monitoring_security
+SHA=$(git rev-parse HEAD)
+docker build -t $REPO/backend:$SHA  -t $REPO/backend:latest  ./praxis
+docker build -t $REPO/frontend:$SHA -t $REPO/frontend:latest ./praxis-frontend
+for img in backend frontend; do docker push $REPO/$img:$SHA; docker push $REPO/$img:latest; done
+```
+
 ### Recommended Production Stack
 
 ```

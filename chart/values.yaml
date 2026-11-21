@@ -14,9 +14,10 @@ praxisHost: praxis.infra-x.cloud
 backend:
   replicaCount: 1
   image:
-    repository: ghcr.io/mogh15/infra_x_projekt/backend
-    tag: latest
-    pullPolicy: Always
+    repository: ghcr.io/mogh15/infra_x_project_monitoring_security/backend
+    # Git-Commit-SHA des gebauten Images (wie in .github/workflows/ci-cd.yml); "latest" zeigt auf dasselbe Image
+    tag: 4fd2107ea90cc272e046f185bd470aff1147867d
+    pullPolicy: IfNotPresent
   service:
     type: ClusterIP
     port: 8080
@@ -62,9 +63,10 @@ metrics:
 frontend:
   replicaCount: 1
   image:
-    repository: ghcr.io/mogh15/infra_x_projekt/frontend
-    tag: latest
-    pullPolicy: Always
+    repository: ghcr.io/mogh15/infra_x_project_monitoring_security/frontend
+    # Git-Commit-SHA des gebauten Images (wie in .github/workflows/ci-cd.yml); "latest" zeigt auf dasselbe Image
+    tag: 4fd2107ea90cc272e046f185bd470aff1147867d
+    pullPolicy: IfNotPresent
   service:
     type: ClusterIP
     port: 80
