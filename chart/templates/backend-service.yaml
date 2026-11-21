@@ -18,4 +18,5 @@ spec:
       protocol: TCP
   selector:
     app: backend
+    app.kubernetes.io/instance: {{ .Release.Name }}
 
