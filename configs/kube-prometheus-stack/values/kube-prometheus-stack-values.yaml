@@ -96,10 +96,10 @@ alertmanager:
 
   config:
     global:
-      smtp_smarthost: 'smtp.google.com:587'
+      smtp_smarthost: 'smtp.gmail.com:587'
       smtp_from: 'infrax98@gmail.com'
       smtp_auth_username: 'infrax98@gmail.com'
-      smtp_auth_password_file: etc/alertmanager/secrets/alertmanager-smtp/smtp-password
+      smtp_auth_password_file: /etc/alertmanager/secrets/alertmanager-smtp/smtp-password
       smtp_require_tls: true
 
     route:
