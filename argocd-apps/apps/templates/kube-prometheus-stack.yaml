@@ -16,6 +16,10 @@ spec:
     - repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
       targetRevision: main
       ref: myrepo
+
+    - repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
+      targetRevision: main
+      path: configs/kube-prometheus-stack/manifests
       
   destination:
     server: https://kubernetes.default.svc
