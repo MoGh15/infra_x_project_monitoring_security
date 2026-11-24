@@ -38,3 +38,9 @@ datasources:
         type: prometheus
         access: proxy
         url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    labelValues: "1"

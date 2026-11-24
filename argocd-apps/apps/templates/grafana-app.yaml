@@ -18,6 +18,9 @@ spec:
     - repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
       targetRevision: main
       path: configs/grafana/manifests
+    - repoURL: https://github.com/MoGh15/infra_x_project_monitoring_security.git
+      targetRevision: main
+      path: dashboards
       
   destination:
     server: https://kubernetes.default.svc
