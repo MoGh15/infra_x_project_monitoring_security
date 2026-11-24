@@ -119,3 +119,7 @@ alertmanager:
           - to: 'mohammadghannam892@gmail.com'
             send_resolved: true
       - name: "null"
+
+    templates:
+      - "/etc/alertmanager/config/*.tmpl"
+  
