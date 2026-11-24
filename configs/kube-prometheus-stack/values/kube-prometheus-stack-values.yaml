@@ -14,6 +14,7 @@ kubeProxy:
   enabled: false
 
 prometheus:
+
   ingress:
     enabled: true
       
@@ -57,3 +58,64 @@ prometheus:
           resources:
             requests:
               storage: 20Gi
+
+alertmanager:
+  ingress:
+    enabled: true
+
+    ingressClassName: nginx
+
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: alertmanager.infra-x.cloud
+      cert-manager.io/cluster-issuer: letsencrypt-ovh-prod
+
+    hosts:
+      - alertmanager.infra-x.cloud
+
+    paths:
+      - /
+
+    pathType: Prefix
+
+    tls:
+      - secretName: alertmanager-general-tls
+        hosts:
+          - alertmanager.infra-x.cloud
+
+  alertmanagerSpec:
+    externalUrl: https://alertmanager.infra-x.cloud
+    secrets:
+      - alertmanager-smtp
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+
+  config:
+    global:
+      smtp_smarthost: 'smtp.google.com:587'
+      smtp_from: 'infrax98@gmail.com'
+      smtp_auth_username: 'infrax98@gmail.com'
+      smtp_auth_password_file: etc/alertmanager/secrets/alertmanager-smtp/smtp-password
+      smtp_require_tls: true
+
+    route:
+      receiver: email
+      routes:
+        - receiver: "null"
+          matchers:
+            - alertname=~"Watchdog"
+
+    receivers:
+      - name: email
+        email_configs:
+          - to: 'obai.babili@gmail.com'
+            send_resolved: true
+          - to: 'hanin1990102@gmail.com'
+            send_resolved: true
+          - to: 'mohammadghannam892@gmail.com'
+            send_resolved: true
+      - name: "null"

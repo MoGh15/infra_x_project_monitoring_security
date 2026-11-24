@@ -122,7 +122,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS__VICTORIAMETRICS-PROD-ALL}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
