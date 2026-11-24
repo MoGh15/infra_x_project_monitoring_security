@@ -17,4 +17,5 @@ spec:
             namespace: monitoring
           annotations:
             summary: "Testing Alert in Emails"
-            description: ""
+            description: "This is an Email Alert that shows that the Alert Manager in our Kubernetes cluster is working perfectly fine."
+          
