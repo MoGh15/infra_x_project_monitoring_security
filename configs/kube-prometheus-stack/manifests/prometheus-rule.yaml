@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test-email-alert
+  namespace: monitoring
+
+spec:
+  groups:
+    # 1. Recording Rules Group (Optional: speeds up dashboards & complex alerts)
+    - name: test-email-alert
+      rules:
+        - alert: testEmailAlert
+          expr: vector(1)
+          for: 1m
+          labels:
+            severity: warning
+            namespace: monitoring
+          annotations:
+            summary: "Testing Alert in Emails"
+            description: ""
