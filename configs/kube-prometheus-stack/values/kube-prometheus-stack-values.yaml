@@ -114,14 +114,14 @@ alertmanager:
             - alertname=~"Watchdog"
 
     receivers:
-      - name: email
-        email_configs:
-          - to: 'example@gmail.com'
-            send_resolved: true
-        #   - to: 'hanin1990102@gmail.com'
-        #     send_resolved: true
-        #   - to: 'mohammadghannam892@gmail.com'
-        #     send_resolved: true
+#      - name: email
+#        email_configs:
+#          - to: 'example@gmail.com'
+#            send_resolved: true
+#        #   - to: 'hanin1990102@gmail.com'
+#        #     send_resolved: true
+#        #   - to: 'mohammadghannam892@gmail.com'
+#        #     send_resolved: true
       - name: "null"
 
     templates:
