@@ -46,6 +46,20 @@ alloy:
           endpoint = "0.0.0.0:4318"
         }
         output {
+          traces = [otelcol.processor.filter.drop_noise.input]
+        }
+      }
+      // Drop health checks / Prometheus scrapes (actuator) and the Mongo ping of the health indicator
+      otelcol.processor.filter "drop_noise" {
+        error_mode = "ignore"
+        traces {
+          span = [
+            `IsMatch(attributes["url.path"], "^/actuator")`,
+            `IsMatch(attributes["http.target"], "^/actuator")`,
+            `attributes["db.operation"] == "hello" or attributes["db.operation.name"] == "hello"`,
+          ]
+        }
+        output {
           traces = [otelcol.processor.k8sattributes.default.input]
         }
       }

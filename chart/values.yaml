@@ -36,6 +36,16 @@ backend:
     limits:
       cpu: "1"
       memory: 1Gi
+  # OpenTelemetry-Java-Agent (Auto-Instrumentierung: HTTP, Spring Security, MongoDB, WebClient)
+  # Traces gehen an Alloy, das sie an Grafana Tempo weiterleitet.
+  tracing:
+    enabled: true
+    agentImage: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.34.0
+    otlpEndpoint: http://alloy.alloy.svc.cluster.local:4318
+    serviceName: praxis-backend
+    environment: production
+    # Anteil der Requests, die getraced werden (1.0 = alle)
+    samplerRatio: "1.0"
 
 # --- Monitoring (kube-prometheus-stack / Grafana) ---
 # Benoetigt die CRDs von kube-prometheus-stack (ServiceMonitor, PrometheusRule).
