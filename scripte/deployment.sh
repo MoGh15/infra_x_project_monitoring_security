@@ -128,18 +128,19 @@ log "Typ '${TYPE}' (parent app-of-apps: ${PARENT_APP}), Ziel-Application: '${APP
 APP_JSON="$(kubectl get application "$APPLICATION" -n "$NS" -o json 2>/dev/null)" \
   || die "Application '${APPLICATION}' nicht gefunden (namespace ${NS}). Ist der ${PARENT_APP} bereits deployt?"
 
-# Child-Apps werden von ${PARENT_APP} verwaltet. Dessen selfHeal würde die gepatchte
-# Branch-Revision sofort wieder auf den Git-Stand zurücksetzen. Daher selfHeal des
-# Parents VOR dem Patch deaktivieren, solange auf dem Branch getestet wird.
+# Child-Apps werden von ${PARENT_APP} verwaltet. Dessen Auto-Sync würde die gepatchte
+# Branch-Revision wieder auf den Git-Stand zurücksetzen: selfHeal sofort, aber auch ohne
+# selfHeal bei jedem neuen Commit (ArgoCD synct automatisch auf neue Revisionen).
+# Daher Auto-Sync des Parents VOR dem Patch komplett deaktivieren, solange getestet wird.
 if [[ "$APPLICATION" != "$PARENT_APP" ]]; then
   if kubectl get application "$PARENT_APP" -n "$NS" >/dev/null 2>&1; then
-    log "Deaktiviere selfHeal von '${PARENT_APP}', damit die Branch-Revision erhalten bleibt ..."
+    log "Deaktiviere Auto-Sync von '${PARENT_APP}', damit die Branch-Revision erhalten bleibt ..."
     kubectl patch application "$PARENT_APP" -n "$NS" --type merge \
-      -p '{"spec":{"syncPolicy":{"automated":{"selfHeal":false}}}}' >/dev/null
-    warn "selfHeal von '${PARENT_APP}' ist deaktiviert. Nach dem Testen wiederherstellen, z.B.:"
-    warn "  kubectl patch application ${PARENT_APP} -n ${NS} --type merge -p '{\"spec\":{\"syncPolicy\":{\"automated\":{\"selfHeal\":true}}}}'"
+      -p '{"spec":{"syncPolicy":{"automated":null}}}' >/dev/null
+    warn "Auto-Sync von '${PARENT_APP}' ist deaktiviert. Nach dem Testen wiederherstellen, z.B.:"
+    warn "  kubectl patch application ${PARENT_APP} -n ${NS} --type merge -p '{\"spec\":{\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true}}}}'"
   else
-    warn "Parent-App '${PARENT_APP}' nicht gefunden; selfHeal wird nicht angepasst."
+    warn "Parent-App '${PARENT_APP}' nicht gefunden; Auto-Sync wird nicht angepasst."
   fi
 fi
 

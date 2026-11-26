@@ -29,7 +29,14 @@ alloy:
       }
       loki.source.kubernetes "pods" {
          targets = discovery.relabel.pods.output
-         forward_to = [loki.write.default.receiver]         
+         forward_to = [loki.process.drop_noise.receiver]
+      }
+      // Drop request logs of the Spring Boot management port (8081): health probes / Prometheus scrapes
+      loki.process "drop_noise" {
+        stage.drop {
+          expression = `8081-exec-\d+\] .*o\.s\.web\.servlet\.DispatcherServlet`
+        }
+        forward_to = [loki.write.default.receiver]
       }
       loki.write "default" {
         endpoint {

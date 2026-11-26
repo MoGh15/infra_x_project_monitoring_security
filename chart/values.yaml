@@ -46,6 +46,9 @@ backend:
     environment: production
     # Anteil der Requests, die getraced werden (1.0 = alle)
     samplerRatio: "1.0"
+    # Loggt jeden Request (Methode/Pfad + Status, ohne Bodies) per DispatcherServlet-DEBUG,
+    # damit es zu jedem Trace passende Logzeilen mit trace_id in Loki gibt
+    requestLogging: true
 
 # --- Monitoring (kube-prometheus-stack / Grafana) ---
 # Benoetigt die CRDs von kube-prometheus-stack (ServiceMonitor, PrometheusRule).

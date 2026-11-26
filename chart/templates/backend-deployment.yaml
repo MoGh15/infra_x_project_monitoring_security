@@ -93,6 +93,11 @@ spec:
             # trace_id/span_id in jede Logzeile schreiben (Grafana: Loki <-> Tempo)
             - name: LOGGING_PATTERN_CORRELATION
               value: "[trace_id=%X{trace_id} span_id=%X{span_id}] "
+            {{- if .Values.backend.tracing.requestLogging }}
+            # Per JSON statt LOGGING_LEVEL_*-Env, da Env-Namen kleingeschrieben werden (Logger sind case-sensitiv)
+            - name: SPRING_APPLICATION_JSON
+              value: '{"logging":{"level":{"org.springframework.web.servlet.DispatcherServlet":"DEBUG"}}}'
+            {{- end }}
             {{- end }}
           {{- if .Values.backend.tracing.enabled }}
           volumeMounts:
