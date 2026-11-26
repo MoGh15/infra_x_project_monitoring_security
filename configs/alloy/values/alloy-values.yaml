@@ -57,6 +57,8 @@ alloy:
             `IsMatch(attributes["url.path"], "^/actuator")`,
             `IsMatch(attributes["http.target"], "^/actuator")`,
             `attributes["db.operation"] == "hello" or attributes["db.operation.name"] == "hello"`,
+            // Everything on the Spring Boot management port (8081), e.g. orphaned Mongo spans of the health indicator
+            `IsMatch(attributes["thread.name"], "^http-nio-8081-")`,
           ]
         }
         output {
