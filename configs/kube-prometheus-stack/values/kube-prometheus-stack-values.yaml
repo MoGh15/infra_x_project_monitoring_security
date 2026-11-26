@@ -42,6 +42,11 @@ prometheus:
     externalUrl: https://prometheus.infra-x.cloud
     retention: 15d
 
+    # Receives service-graph / span metrics from Tempo's metrics generator
+    enableRemoteWriteReceiver: true
+    enableFeatures:
+      - exemplar-storage
+
     serviceMonitorSelectorNilUsesHelmValues: false
 
     podMonitorSelectorNilUsesHelmValues: false

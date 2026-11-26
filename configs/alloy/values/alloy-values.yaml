@@ -36,3 +36,63 @@ alloy:
           url = "http://loki.loki.svc.cluster.local:3100/loki/api/v1/push"
         }
       }
+
+      // Traces: apps send OTLP to alloy.alloy.svc.cluster.local:4317 (gRPC) / :4318 (HTTP)
+      otelcol.receiver.otlp "default" {
+        grpc {
+          endpoint = "0.0.0.0:4317"
+        }
+        http {
+          endpoint = "0.0.0.0:4318"
+        }
+        output {
+          traces = [otelcol.processor.k8sattributes.default.input]
+        }
+      }
+      otelcol.processor.k8sattributes "default" {
+        extract {
+          metadata = [
+            "k8s.namespace.name",
+            "k8s.pod.name",
+            "k8s.deployment.name",
+            "k8s.node.name",
+            "k8s.container.name",
+          ]
+        }
+        pod_association {
+          source {
+            from = "resource_attribute"
+            name = "k8s.pod.ip"
+          }
+        }
+        pod_association {
+          source {
+            from = "connection"
+          }
+        }
+        output {
+          traces = [otelcol.processor.batch.default.input]
+        }
+      }
+      otelcol.processor.batch "default" {
+        output {
+          traces = [otelcol.exporter.otlp.tempo.input]
+        }
+      }
+      otelcol.exporter.otlp "tempo" {
+        client {
+          endpoint = "tempo.tempo.svc.cluster.local:4317"
+          tls {
+            insecure = true
+          }
+        }
+      }
+  extraPorts:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
